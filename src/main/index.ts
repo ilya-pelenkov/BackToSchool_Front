@@ -1,27 +1,32 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow, app, ipcMain, shell } from 'electron'
+
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: is.dev ? 540 : 1080,
+    height: is.dev ? 960 : 1920,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
+      sandbox: false,
+    },
   })
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    if (is.dev) {
+      mainWindow.webContents.openDevTools()
+    }
   })
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
+  mainWindow.webContents.setWindowOpenHandler(details => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
@@ -50,7 +55,7 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('ping', () => console.log('ping'))
 
   createWindow()
 
@@ -70,5 +75,7 @@ app.on('window-all-closed', () => {
   }
 })
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+//TODO: заменить на получение данных о регистрации из electron-store
+ipcMain.handle('device:isRegistered', () => {
+  return new Promise(resolve => setTimeout(() => resolve(true), 4000)) // временно, потом заменишь на реальную проверку electron-store
+})

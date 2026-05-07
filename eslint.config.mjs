@@ -36,6 +36,7 @@ export default defineConfig(
       'no-console': 'warn',
       'no-unused-vars': 'off', // Отключен, так как работает TS-версия
       'no-fallthrough': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
 
