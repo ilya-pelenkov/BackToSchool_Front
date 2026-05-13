@@ -1,0 +1,32 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
+  "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*", "src/shared/**/*",],
+  "compilerOptions": {
+    "composite": true, // для связи с основным tsconfig.json
+    "target": "ES2022",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "outDir": "out", // Куда теоретически должны попадать файлы, если бы не было "noEmit": true
+    "types": ["electron-vite/node"],
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "incremental": true,           // Ускоряет повторную проверку типов за счет кэширования
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo", // Путь к кэшу (скрыт в node_modules)
+    "isolatedModules": true,       // Гарантирует, что каждый файл можно скомпилировать отдельно (требование Vite)
+    "moduleDetection": "force",    // Каждый файл считается модулем (избегаем конфликтов имен)
+    "noEmit": true,                // Не создавать .js файлы (за это отвечает Vite, а не TS)
+    "allowImportingTsExtensions": true, // Позволяет импорты с расширением .ts
+
+    /* Linting */
+    "strict": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "@shared/*": ["./src/shared/*"],
+    }
+  }
+}

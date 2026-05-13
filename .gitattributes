@@ -1,0 +1,40 @@
+# Нормализация по умолчанию
+* text=auto eol=lf
+
+# Исходный код
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.env text eol=lf
+*.env.* text eol=lf
+
+# Бинарные файлы — изображения
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+
+# Бинарные файлы — шрифты
+*.woff binary
+*.woff2 binary
+*.ttf binary
+
+# Бинарные файлы — медиа
+*.mp4 binary
+*.webm binary
+*.mov binary
+*.mp3 binary
+*.wav binary
+
+# Скрипты
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf

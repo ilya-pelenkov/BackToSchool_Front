@@ -1,0 +1,14 @@
+# Ignore artifacts:
+out
+dist
+pnpm-lock.yaml
+LICENSE.md
+tsconfig.json
+tsconfig.*.json
+build
+coverage
+.husky
+node_modules
+public
+
+vite-env.d.ts
