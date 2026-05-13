@@ -8,7 +8,7 @@ import { registerIpcHandlers } from './ipc/ipc'
 import { registerDevice } from './registration'
 
 function createWindow(): void {
-  // Create the browser window.
+  // Создание окна
   const mainWindow = new BrowserWindow({
     width: is.dev ? 540 : 1080,
     height: is.dev ? 960 : 1920,
