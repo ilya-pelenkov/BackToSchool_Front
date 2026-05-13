@@ -31,6 +31,8 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@mantine/core": "^9.2.0",
+    "clsx": "^2.1.1",
     "electron-log": "^5.4.3",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.3.9"
@@ -53,6 +55,9 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "postcss": "^8.5.14",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
     "prettier": "^3.7.4",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
