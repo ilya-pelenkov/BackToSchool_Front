@@ -10,8 +10,8 @@ import { registerDevice } from './registration'
 function createWindow(): void {
   // Создание окна
   const mainWindow = new BrowserWindow({
-    width: is.dev ? 540 : 1080,
-    height: is.dev ? 960 : 1920,
+    width: is.dev ? 486 : 1080, //45% в dev
+    height: is.dev ? 864 : 1920, //45% в dev
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
