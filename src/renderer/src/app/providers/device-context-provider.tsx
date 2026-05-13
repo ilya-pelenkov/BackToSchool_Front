@@ -19,8 +19,8 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const timeout = setTimeout(() => setIsLoading(false), SPLASH_SCREEN_MAX_SHOW_TIME)
 
-    window.electron.ipcRenderer
-      .invoke('device:isRegistered')
+    window.api.device
+      .isRegistered()
       .then(setIsRegistered)
       .finally(() => {
         clearTimeout(timeout)

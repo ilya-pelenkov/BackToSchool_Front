@@ -1,9 +1,11 @@
-import { BrowserWindow, app, ipcMain, shell } from 'electron'
+import { BrowserWindow, app, shell } from 'electron'
 
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { join } from 'path'
 
 import icon from '../../resources/icon.png?asset'
+import { registerIpcHandlers } from './ipc/ipc'
+import { registerDevice } from './registration'
 
 function createWindow(): void {
   // Create the browser window.
@@ -43,7 +45,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -54,8 +56,12 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('ping'))
+  // регистрируем все ipcMain.handle()
+  registerIpcHandlers()
+
+  // регистрируем устройство — до createWindow,
+  // чтобы store был заполнен до первого IPC-запроса из renderer
+  await registerDevice()
 
   createWindow()
 
@@ -73,9 +79,4 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
-
-//TODO: заменить на получение данных о регистрации из electron-store
-ipcMain.handle('device:isRegistered', () => {
-  return new Promise(resolve => setTimeout(() => resolve(true), 4000)) // временно, потом заменишь на реальную проверку electron-store
 })

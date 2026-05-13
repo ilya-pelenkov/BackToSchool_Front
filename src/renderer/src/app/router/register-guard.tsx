@@ -9,9 +9,6 @@ import { DeviceContext } from '../providers/device-context-provider'
 export function RegisteredGuard() {
   const { isRegistered, isLoading } = useContext(DeviceContext)
 
-  console.log(isRegistered)
-  console.log(isLoading)
-
   if (isLoading) return <SplashScreen />
   return isRegistered ? <CommonLayout /> : <Navigate to="/not-registered" replace />
 }
