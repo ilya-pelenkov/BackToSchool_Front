@@ -1,6 +1,6 @@
 // src/main/registration.ts
+import { isApiError } from '../shared/request-errors'
 import { deviceApi } from './api'
-import { isApiError } from './api/errors'
 import logger from './logger'
 import store from './store'
 

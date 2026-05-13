@@ -1,6 +1,7 @@
+import { ApiError } from '@shared/request-errors'
+
 import logger from '../logger'
 import { runErrorHandlers } from './error-handlers'
-import { ApiError } from './errors'
 import { RetryPreset, calcDelay, getRetryOptions } from './retry'
 
 const BASE_URL = import.meta.env.MAIN_VITE_API_URL
@@ -10,7 +11,7 @@ interface RequestOptions extends RequestInit {
   retry?: RetryPreset // по умолчанию default
 }
 
-// Одиночный fetch зппрос
+// Одиночный fetch запрос
 async function fetchOnce<T>(endpoint: string, options: RequestOptions): Promise<T> {
   const { timeout = 5000, retry: _retry, ...fetchOptions } = options
 

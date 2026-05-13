@@ -1,5 +1,6 @@
+import { ApiError } from '@shared/request-errors'
+
 import logger from '../logger'
-import { ApiError } from './errors'
 
 export type ErrorHandler = (err: ApiError) => void
 
