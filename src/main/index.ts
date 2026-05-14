@@ -1,82 +1,34 @@
-import { BrowserWindow, app, shell } from 'electron'
+import { app, globalShortcut } from 'electron'
 
-import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { join } from 'path'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { is } from '@electron-toolkit/utils'
 
-import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipc/ipc'
+import { registerSecurityHandlers } from './kiosk-mode-security'
 import { registerDevice } from './registration'
+import { createWindow } from './window'
 
-function createWindow(): void {
-  // Создание окна
-  const mainWindow = new BrowserWindow({
-    width: is.dev ? 486 : 1080, //45% в dev
-    height: is.dev ? 864 : 1920, //45% в dev
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
-    },
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-    if (is.dev) {
-      mainWindow.webContents.openDevTools()
-    }
-  })
-
-  mainWindow.webContents.setWindowOpenHandler(details => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.back-to-school.kiosk')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // регистрируем все ipcMain.handle()
   registerIpcHandlers()
-
-  // регистрируем устройство — до createWindow,
-  // чтобы store был заполнен до первого IPC-запроса из renderer
   await registerDevice()
 
-  createWindow()
+  const win = createWindow()
+  registerSecurityHandlers(win)
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+  // только в dev — чтобы можно было закрыть окно
+  if (is.dev) {
+    app.on('window-all-closed', () => {
+      app.quit()
+    })
   }
+
+  app.on('will-quit', () => {
+    globalShortcut.unregisterAll()
+  })
 })

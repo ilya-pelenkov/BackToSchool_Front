@@ -7,10 +7,10 @@ import store from './store'
 //TODO: заменить store.set на реальную логику
 export async function registerDevice(): Promise<void> {
   try {
-    const { deviceId } = await deviceApi.register(store.get('deviceId'))
-    store.set('deviceId', deviceId)
+    const { token } = await deviceApi.register(store.get('deviceId'))
+    store.set('deviceId', token)
     store.set('isRegistered', true)
-    logger.info('Device registered', { deviceId })
+    logger.info('Device registered', { token })
   } catch (err) {
     store.set('isRegistered', false)
 
