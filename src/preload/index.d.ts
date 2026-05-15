@@ -7,6 +7,7 @@ declare global {
     electron: ElectronAPI
     api: {
       device: typeof deviceApi
+      media: typeof mediaApi
     }
   }
 }

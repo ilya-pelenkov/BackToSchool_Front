@@ -1,14 +1,12 @@
 import { contextBridge } from 'electron'
 
-import { deviceApi } from './api'
+import { deviceApi, mediaApi } from './api'
 
 const api = {
   device: deviceApi,
+  media: mediaApi,
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('api', api)
