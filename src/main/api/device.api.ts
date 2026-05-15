@@ -1,10 +1,12 @@
-import { apiClient } from './api-client'
+// import { apiClient } from './api-client'
 
 //TODO: заменить на реальный запрос регистрации устройста
 interface RegisterResponse {
-  deviceId: string
+  token: string
 }
 
 export const deviceApi = {
-  register: (deviceId: string | null) => apiClient.post<RegisterResponse>('/device/register', { deviceId }),
+  // register: (deviceId: string | null) => apiClient.post<RegisterResponse>('/device/register', { deviceId }),
+  register: (deviceId: string | null) =>
+    new Promise<RegisterResponse>(resolve => setTimeout(() => resolve({ token: `${deviceId}-token` }), 1000)),
 }

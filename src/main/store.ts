@@ -9,7 +9,7 @@ interface StoreSchema {
 const store = new Store<StoreSchema>({
   defaults: {
     isRegistered: false,
-    deviceId: null,
+    deviceId: '123',
   },
 })
 
