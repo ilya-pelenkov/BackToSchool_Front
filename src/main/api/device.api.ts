@@ -1,4 +1,4 @@
-import { apiClient } from './api-client'
+// import { apiClient } from './api-client'
 
 //TODO: заменить на реальный запрос регистрации устройста
 interface RegisterResponse {

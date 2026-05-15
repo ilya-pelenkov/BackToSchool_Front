@@ -19,7 +19,6 @@ export function createWindow(): BrowserWindow {
       contextIsolation: true,
       nodeIntegration: false,
       devTools: is.dev,
-      sandbox: false,
     },
   })
 
