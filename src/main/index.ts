@@ -1,4 +1,4 @@
-import { app, globalShortcut } from 'electron'
+import { app, globalShortcut, net, protocol } from 'electron'
 
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { is } from '@electron-toolkit/utils'
@@ -7,6 +7,8 @@ import { registerIpcHandlers } from './ipc/ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
 import { registerDevice } from './registration'
 import { createWindow } from './window'
+
+protocol.registerSchemesAsPrivileged([{ scheme: 'media', privileges: { secure: true, standard: true, stream: true } }])
 
 app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.back-to-school.kiosk')
@@ -30,5 +32,10 @@ app.whenReady().then(async () => {
 
   app.on('will-quit', () => {
     globalShortcut.unregisterAll()
+  })
+
+  protocol.handle('media', request => {
+    const filePath = decodeURIComponent(request.url.replace('media://', ''))
+    return net.fetch(`file://${filePath}`)
   })
 })
