@@ -8,5 +8,5 @@ interface RegisterResponse {
 export const deviceApi = {
   // register: (deviceId: string | null) => apiClient.post<RegisterResponse>('/device/register', { deviceId }),
   register: (deviceId: string | null) =>
-    new Promise<RegisterResponse>(resolve => setTimeout(() => resolve({ token: `${deviceId}-token` }), 1000)),
+    new Promise<RegisterResponse>(resolve => setTimeout(() => resolve({ token: `${deviceId}` }), 1000)),
 }
