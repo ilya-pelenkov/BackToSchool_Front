@@ -15,8 +15,7 @@ export function CommonLayout({ header }: TCommonLayoutProps) {
       <AppShell.Header>{header}</AppShell.Header>
 
       <AppShell.Main style={{ height: '90vh' }}>
-        <ScrollArea style={{ height: '100%', width: '100%' }}>
-          <p>компонент Common Layout: в разработке</p>
+        <ScrollArea style={{ height: '90vh', width: '100%' }}>
           <Outlet />
         </ScrollArea>
       </AppShell.Main>

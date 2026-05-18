@@ -32,6 +32,11 @@ export function MediaPlaylist() {
   if (!files.length) return <p>Нет файлов в папке cached</p> //TODO: продумать заглушку
 
   return (
-    <MediaPlayer file={{ ...files[currentIndex], duration: IMAGE_DURATION }} onEnded={goNext} onError={handleError} />
+    <MediaPlayer
+      file={{ ...files[currentIndex], duration: IMAGE_DURATION }}
+      nextFile={{ ...files[(currentIndex + 1) % files.length], duration: IMAGE_DURATION }}
+      onEnded={goNext}
+      onError={handleError}
+    />
   )
 }
