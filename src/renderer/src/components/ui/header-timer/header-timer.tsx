@@ -22,7 +22,7 @@ export function HeaderTimer() {
     return () => clearInterval(interval)
   }, [])
   return (
-    <Text size="md" c="white" fw={300}>
+    <Text size="32px" c="white" fw={700}>
       {currentTime}
     </Text>
   )
