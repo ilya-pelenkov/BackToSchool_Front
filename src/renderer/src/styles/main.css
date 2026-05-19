@@ -4,6 +4,12 @@
   box-sizing: border-box;
 }
 
+* {
+  touch-action: manipulation; /* убирает задержку 300мс при тапе, отключает двойной тап, чтобы переопределить - touch-action: auto; */
+  -webkit-tap-highlight-color: transparent; /* убирает авто подсветку при тапе, задать свою через :active */
+  user-select: none; /* запрещает выделение текста */
+}
+
 ul {
   list-style: none;
 }
