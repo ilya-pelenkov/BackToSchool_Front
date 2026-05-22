@@ -12,11 +12,16 @@ export async function registerDevice(): Promise<void> {
     store.set('isRegisterLoading', true)
     store.set('isRegistrationError', false)
     const deviceKey = machineIdSync()
-    const { auth_token, terminal_id } = await deviceApi.register(deviceKey)
+    const { auth_token, terminal_id } = await deviceApi.register(deviceKey, (attempt, maxAttempts) => {
+      BrowserWindow.getAllWindows()[0]?.webContents.send('registration:attempt', {
+        attempt,
+        maxAttempts,
+      })
+    })
     store.set('authToken', auth_token)
     store.set('terminalId', terminal_id.toString())
     store.set('isRegistered', true)
-    logger.info('Device registered', { terminal_id }) // без токена
+    logger.info('Device registered', { terminal_id })
   } catch (err) {
     store.set('isRegistered', false)
     store.set('isRegistrationError', true)

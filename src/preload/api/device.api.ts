@@ -14,4 +14,8 @@ export const deviceApi = {
   onRegistrationDone: (cb: (result: { success: boolean }) => void): void => {
     ipcRenderer.once('registration:done', (_, result) => cb(result))
   },
+
+  onRegistrationAttempt: (cb: (data: { attempt: number; maxAttempts: number }) => void): void => {
+    ipcRenderer.on('registration:attempt', (_, data) => cb(data))
+  },
 }

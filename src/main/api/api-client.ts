@@ -10,6 +10,7 @@ const BASE_URL = import.meta.env.MAIN_VITE_API_URL
 interface RequestOptions extends RequestInit {
   timeout?: number
   retry?: RetryPreset // по умолчанию default
+  onRetry?: (attempt: number, maxAttempts: number) => void
 }
 
 // Одиночный fetch запрос
@@ -120,6 +121,8 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
         attempt,
         attemptsLeft,
       })
+
+      options.onRetry?.(attempt + 1, retryOpts.maxAttempts)
     }
   }
 
