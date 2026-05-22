@@ -3,34 +3,39 @@ import { ReactNode, createContext, useEffect, useState } from 'react'
 interface DeviceContextValue {
   isRegistered: boolean
   isLoading: boolean
+  isError: boolean
 }
 
 const DeviceContext = createContext<DeviceContextValue>({
   isRegistered: false,
   isLoading: true,
+  isError: false,
 })
-
-const SPLASH_SCREEN_MAX_SHOW_TIME = 5000
 
 export function DeviceProvider({ children }: { children: ReactNode }) {
   const [isRegistered, setIsRegistered] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
-    const timeout = setTimeout(() => setIsLoading(false), SPLASH_SCREEN_MAX_SHOW_TIME)
-
-    window.api.device
-      .isRegistered()
-      .then(setIsRegistered)
-      .finally(() => {
-        clearTimeout(timeout)
+    window.api.device.getRegistrationStatus().then(status => {
+      if (!status.isLoading) {
+        // регистрация уже завершилась до монтирования — читаем из store
+        setIsRegistered(status.isRegistered)
+        setIsError(status.isError)
+        setIsLoading(false)
+        return
+      }
+      // регистрация ещё идёт — ждём событие из main
+      window.api.device.onRegistrationDone(result => {
+        setIsRegistered(result.success)
+        setIsError(!result.success)
         setIsLoading(false)
       })
-
-    return () => clearTimeout(timeout)
+    })
   }, [])
 
-  return <DeviceContext.Provider value={{ isRegistered, isLoading }}>{children}</DeviceContext.Provider>
+  return <DeviceContext.Provider value={{ isRegistered, isLoading, isError }}>{children}</DeviceContext.Provider>
 }
 
 export { DeviceContext }
