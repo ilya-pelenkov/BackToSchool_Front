@@ -17,29 +17,24 @@ export async function registerDevice(): Promise<void> {
     store.set('terminalId', terminal_id.toString())
     store.set('isRegistered', true)
     logger.info('Device registered', { terminal_id }) // без токена
-
-    // оповещение renderer, что регистрация успешно завершена
-    BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', { success: true })
   } catch (err) {
     store.set('isRegistered', false)
+    store.set('isRegistrationError', true)
 
     if (isApiError(err)) {
-      store.set('isRegistrationError', true)
       if (err.isUnauthorized) logger.warn('Device not authorized')
       if (err.isServerError) logger.error('Backend error, retry later')
       if (err.isTimeout) logger.warn('Registration timed out')
       if (err.isNetworkError) logger.warn('No network connection')
 
-      // оповещение renderer, что регистрация завершена с ошибкой
-      BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', { success: false })
-
       return
     }
 
     logger.error('Unexpected device registration error', { error: (err as Error).message })
-    // оповещение renderer, что регистрация завершена с ошибкой
-    BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', { success: false })
   } finally {
     store.set('isRegisterLoading', false)
+    BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', {
+      success: store.get('isRegistered'),
+    })
   }
 }

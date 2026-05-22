@@ -10,7 +10,7 @@ interface RegisterResponse {
 
 export const deviceApi = {
   register: (deviceKey: string) =>
-    apiClient.post<RegisterResponse>('/terminals/register/', { deviceKey }, { retry: 'critical' }),
+    apiClient.post<RegisterResponse>('/terminals/register/', { deviceKey }, { retry: 'critical', timeout: 10_000 }),
   // register: (deviceId: string) =>
   //   new Promise<RegisterResponse>(resolve =>
   //     setTimeout(
