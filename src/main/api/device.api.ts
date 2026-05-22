@@ -1,12 +1,22 @@
-// import { apiClient } from './api-client'
+import { apiClient } from './api-client'
 
-//TODO: заменить на реальный запрос регистрации устройста
 interface RegisterResponse {
-  token: string
+  terminal_id: number
+  auth_token: string
+  location_id: number
+  district_id: number
+  status: 'offline' | 'online'
 }
 
 export const deviceApi = {
-  // register: (deviceId: string | null) => apiClient.post<RegisterResponse>('/device/register', { deviceId }),
-  register: (deviceId: string | null) =>
-    new Promise<RegisterResponse>(resolve => setTimeout(() => resolve({ token: `${deviceId}` }), 1000)),
+  register: (deviceKey: string) =>
+    apiClient.post<RegisterResponse>('/terminals/register/', { deviceKey }, { retry: 'critical' }),
+  // register: (deviceId: string) =>
+  //   new Promise<RegisterResponse>(resolve =>
+  //     setTimeout(
+  //       () =>
+  //         resolve({ terminal_id: 123, auth_token: deviceId, location_id: 123, district_id: 123, status: 'offline' }),
+  //       1000
+  //     )
+  //   ),
 }

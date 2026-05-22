@@ -35,7 +35,8 @@
     "clsx": "^2.1.1",
     "electron-log": "^5.4.3",
     "electron-store": "^8.2.0",
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "node-machine-id": "^1.1.12"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
