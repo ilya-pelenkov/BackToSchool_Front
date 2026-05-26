@@ -4,13 +4,14 @@ import { machineIdSync } from 'node-machine-id'
 
 import { isApiError } from '../shared/request-errors'
 import { deviceApi } from './api'
+import { resetReregistrationAttempts } from './api/setup-error-handlers'
 import logger from './logger'
-import store from './store'
+import { registrationStore } from './store'
 
 export async function registerDevice(): Promise<void> {
   try {
-    store.set('isRegisterLoading', true)
-    store.set('isRegistrationError', false)
+    registrationStore.set('isRegisterLoading', true)
+    registrationStore.set('isRegistrationError', false)
     const deviceKey = machineIdSync()
     const { auth_token, terminal_id } = await deviceApi.register(deviceKey, (attempt, maxAttempts) => {
       BrowserWindow.getAllWindows()[0]?.webContents.send('registration:attempt', {
@@ -18,13 +19,14 @@ export async function registerDevice(): Promise<void> {
         maxAttempts,
       })
     })
-    store.set('authToken', auth_token)
-    store.set('terminalId', terminal_id.toString())
-    store.set('isRegistered', true)
+    registrationStore.set('authToken', auth_token)
+    registrationStore.set('terminalId', terminal_id.toString())
+    registrationStore.set('isRegistered', true)
+    resetReregistrationAttempts()
     logger.info('Device registered', { terminal_id })
   } catch (err) {
-    store.set('isRegistered', false)
-    store.set('isRegistrationError', true)
+    registrationStore.set('isRegistered', false)
+    registrationStore.set('isRegistrationError', true)
 
     if (isApiError(err)) {
       if (err.isUnauthorized) logger.warn('Device not authorized')
@@ -37,9 +39,9 @@ export async function registerDevice(): Promise<void> {
 
     logger.error('Unexpected device registration error', { error: (err as Error).message })
   } finally {
-    store.set('isRegisterLoading', false)
+    registrationStore.set('isRegisterLoading', false)
     BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', {
-      success: store.get('isRegistered'),
+      success: registrationStore.get('isRegistered'),
     })
   }
 }

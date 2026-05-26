@@ -5,7 +5,7 @@ import { join } from 'path'
 
 import { TMediaIpcGetFiles } from '@shared/types'
 
-import store from '../store'
+import { registrationStore } from '../store/registration-store'
 
 const CACHED_DIR = join(app.getPath('userData'), 'cached')
 
@@ -14,12 +14,12 @@ const SUPPORTED_EXTENSIONS = ['.mp4', '.jpg', '.jpeg', '.png', '.webp'] //TODO: 
 export function registerIpcHandlers(): void {
   //Состояние регистрации
   ipcMain.handle('device:isRegistered', (): boolean => {
-    return store.get('isRegistered')
+    return registrationStore.get('isRegistered')
   })
   ipcMain.handle('device:getRegistrationStatus', () => ({
-    isLoading: store.get('isRegisterLoading') ?? false,
-    isRegistered: store.get('isRegistered') ?? false,
-    isError: store.get('isRegistrationError') ?? false,
+    isLoading: registrationStore.get('isRegisterLoading') ?? false,
+    isRegistered: registrationStore.get('isRegistered') ?? false,
+    isError: registrationStore.get('isRegistrationError') ?? false,
   }))
 
   //Получение медиа файлов для отображения

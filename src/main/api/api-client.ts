@@ -1,7 +1,7 @@
 import { ApiError } from '@shared/request-errors'
 
 import logger from '../logger'
-import store from '../store'
+import { registrationStore } from '../store'
 import { runErrorHandlers } from './error-handlers'
 import { RetryPreset, calcDelay, getRetryOptions } from './retry'
 
@@ -19,7 +19,7 @@ async function fetchOnce<T>(endpoint: string, options: RequestOptions): Promise<
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeout)
-  const authToken = store.get('authToken') ?? ''
+  const authToken = registrationStore.get('authToken') ?? ''
 
   try {
     const res = await fetch(`${BASE_URL}${endpoint}`, {

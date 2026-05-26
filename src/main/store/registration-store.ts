@@ -1,6 +1,6 @@
 import Store from 'electron-store'
 
-interface StoreSchema {
+interface RegistrationSchema {
   isRegistered: boolean
   isRegisterLoading: boolean
   isRegistrationError: boolean
@@ -8,7 +8,8 @@ interface StoreSchema {
   terminalId: string | null
 }
 
-const store = new Store<StoreSchema>({
+export const registrationStore = new Store<RegistrationSchema>({
+  name: 'registration',
   defaults: {
     isRegistered: false,
     isRegisterLoading: false,
@@ -17,5 +18,3 @@ const store = new Store<StoreSchema>({
     terminalId: null,
   },
 })
-
-export default store
