@@ -14,6 +14,6 @@ export const deviceApi = {
     apiClient.post<RegisterResponse>(
       '/terminals/register/',
       { serial_number: deviceKey, secret_key: '57rstRyCkWN2K6Hj2jwASW55lRH1B4nvLX2zrsL8lc4' },
-      { retry: 'critical', timeout: 10_000, onRetry }
+      { retry: 'critical', timeout: 15_000, onRetry }
     ),
 }

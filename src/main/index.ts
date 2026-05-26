@@ -7,7 +7,7 @@ import { pathToFileURL } from 'url'
 import { registerIpcHandlers } from './ipc/ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
 import { registerDevice } from './registration'
-import store from './store'
+import { registrationStore } from './store'
 import { createWindow } from './window'
 
 protocol.registerSchemesAsPrivileged([
@@ -27,8 +27,8 @@ app.whenReady().then(async () => {
   registerSecurityHandlers(win)
 
   //проверка регистрации устройства - если нет данных, то отправялется запрос на регистрацию
-  const authToken = store.get('authToken')
-  const terminalId = store.get('terminalId')
+  const authToken = registrationStore.get('authToken')
+  const terminalId = registrationStore.get('terminalId')
   if (!authToken || !terminalId) registerDevice()
 
   // только в dev — чтобы можно было закрыть окно

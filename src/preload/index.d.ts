@@ -1,6 +1,6 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
-import { deviceApi } from './api/device.api'
+import { deviceApi, mediaApi, networkApi } from './api'
 
 declare global {
   interface Window {
@@ -8,6 +8,7 @@ declare global {
     api: {
       device: typeof deviceApi
       media: typeof mediaApi
+      network: typeof networkApi
     }
   }
 }
