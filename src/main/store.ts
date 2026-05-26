@@ -2,14 +2,19 @@ import Store from 'electron-store'
 
 interface StoreSchema {
   isRegistered: boolean
-  deviceId: string | null
+  isRegisterLoading: boolean
+  isRegistrationError: boolean
+  authToken: string | null
+  terminalId: string | null
 }
 
-//TODO: заменить store.set на реальную логику регистрации
 const store = new Store<StoreSchema>({
   defaults: {
     isRegistered: false,
-    deviceId: '123',
+    isRegisterLoading: false,
+    isRegistrationError: false,
+    authToken: null,
+    terminalId: null,
   },
 })
 

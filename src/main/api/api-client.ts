@@ -1,6 +1,7 @@
 import { ApiError } from '@shared/request-errors'
 
 import logger from '../logger'
+import store from '../store'
 import { runErrorHandlers } from './error-handlers'
 import { RetryPreset, calcDelay, getRetryOptions } from './retry'
 
@@ -9,6 +10,7 @@ const BASE_URL = import.meta.env.MAIN_VITE_API_URL
 interface RequestOptions extends RequestInit {
   timeout?: number
   retry?: RetryPreset // по умолчанию default
+  onRetry?: (attempt: number, maxAttempts: number) => void
 }
 
 // Одиночный fetch запрос
@@ -17,6 +19,7 @@ async function fetchOnce<T>(endpoint: string, options: RequestOptions): Promise<
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeout)
+  const authToken = store.get('authToken') ?? ''
 
   try {
     const res = await fetch(`${BASE_URL}${endpoint}`, {
@@ -24,6 +27,7 @@ async function fetchOnce<T>(endpoint: string, options: RequestOptions): Promise<
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
+        'X-Terminal-Token': authToken,
         ...fetchOptions.headers,
       },
     })
@@ -117,6 +121,8 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
         attempt,
         attemptsLeft,
       })
+
+      options.onRetry?.(attempt + 1, retryOpts.maxAttempts)
     }
   }
 

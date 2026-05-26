@@ -12,9 +12,17 @@ const CACHED_DIR = join(app.getPath('userData'), 'cached')
 const SUPPORTED_EXTENSIONS = ['.mp4', '.jpg', '.jpeg', '.png', '.webp'] //TODO: продумать поддерживаемые файлы
 
 export function registerIpcHandlers(): void {
+  //Состояние регистрации
   ipcMain.handle('device:isRegistered', (): boolean => {
     return store.get('isRegistered')
   })
+  ipcMain.handle('device:getRegistrationStatus', () => ({
+    isLoading: store.get('isRegisterLoading') ?? false,
+    isRegistered: store.get('isRegistered') ?? false,
+    isError: store.get('isRegistrationError') ?? false,
+  }))
+
+  //Получение медиа файлов для отображения
   ipcMain.handle('media:getFiles', (): TMediaIpcGetFiles => {
     const files = readdirSync(CACHED_DIR)
       .filter(f => SUPPORTED_EXTENSIONS.some(ext => f.toLowerCase().endsWith(ext)))
