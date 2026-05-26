@@ -1,10 +1,11 @@
 import { contextBridge } from 'electron'
 
-import { deviceApi, mediaApi } from './api'
+import { deviceApi, mediaApi, networkApi } from './api'
 
 const api = {
   device: deviceApi,
   media: mediaApi,
+  network: networkApi,
 }
 
 if (process.contextIsolated) {

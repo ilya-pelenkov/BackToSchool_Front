@@ -5,7 +5,7 @@ import { join } from 'path'
 
 import { TMediaIpcGetFiles } from '@shared/types'
 
-import { registrationStore } from '../store/registration-store'
+import { networkStore, registrationStore } from '../store'
 
 const CACHED_DIR = join(app.getPath('userData'), 'cached')
 
@@ -33,4 +33,9 @@ export function registerIpcHandlers(): void {
       }))
     return files
   })
+
+  //Cостояние сети (онлайн/оффлайн)
+  ipcMain.handle('network:getStatus', () => ({
+    online: networkStore.get('isOnline') ?? true,
+  }))
 }
