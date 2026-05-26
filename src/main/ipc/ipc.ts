@@ -36,6 +36,6 @@ export function registerIpcHandlers(): void {
 
   //Cостояние сети (онлайн/оффлайн)
   ipcMain.handle('network:getStatus', () => ({
-    online: networkStore.get('isOnline') ?? true,
+    online: networkStore.get('isOnline'),
   }))
 }

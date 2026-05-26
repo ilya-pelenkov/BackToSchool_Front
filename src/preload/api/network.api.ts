@@ -6,9 +6,8 @@ export interface NetworkStatus {
 
 export const networkApi = {
   //однократное получение
-  getNetworkStatus: () => {
-    ipcRenderer.invoke('network:getStatus')
-  },
+  getStatus: (): Promise<NetworkStatus> => ipcRenderer.invoke('network:getStatus'),
+
   //подписка на изменение
   onStatusChange: (cb: (status: NetworkStatus) => void): void => {
     ipcRenderer.on('network:status', (_, status) => cb(status))
