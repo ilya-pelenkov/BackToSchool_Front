@@ -2,7 +2,7 @@ import { BrowserWindow, net } from 'electron'
 
 import logger from '../logger'
 import { registerDevice } from '../registration'
-import { networkStore, registrationStore } from '../store'
+import { deviceStore, networkStore, registrationStore } from '../store'
 import { registerErrorHandler } from './error-handlers'
 
 let reregistrationAttempts = 0
@@ -26,7 +26,7 @@ export function setupErrorHandlers(): void {
     reregistrationAttempts++
     logger.warn('Unauthorized, attempting reregistration', { attempt: reregistrationAttempts })
     registrationStore.delete('authToken')
-    registrationStore.delete('terminalId')
+    deviceStore.delete('terminalId')
     registrationStore.set('isRegistered', false)
     registerDevice()
   })

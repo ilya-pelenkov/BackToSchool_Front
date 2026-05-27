@@ -4,10 +4,12 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { is } from '@electron-toolkit/utils'
 import { pathToFileURL } from 'url'
 
+import { runHeartbeat, shouldSendHeartbeatOnStart } from './heartbeat'
 import { registerIpcHandlers } from './ipc/ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
 import { registerDevice } from './registration'
-import { registrationStore } from './store'
+import { initScheduler } from './scheduler'
+import { deviceStore, registrationStore } from './store'
 import { createWindow } from './window'
 
 protocol.registerSchemesAsPrivileged([
@@ -28,8 +30,18 @@ app.whenReady().then(async () => {
 
   //проверка регистрации устройства - если нет данных, то отправялется запрос на регистрацию
   const authToken = registrationStore.get('authToken')
-  const terminalId = registrationStore.get('terminalId')
-  if (!authToken || !terminalId) registerDevice()
+  const terminalId = deviceStore.get('terminalId')
+  if (!authToken || !terminalId) {
+    // ждём регистрацию, потом heartbeat и sync при необходимости
+    registerDevice().then(() => {
+      if (shouldSendHeartbeatOnStart()) runHeartbeat()
+    })
+  } else {
+    // уже есть регистрация — сразу heartbeat и sync при необходимости
+    if (shouldSendHeartbeatOnStart()) runHeartbeat()
+  }
+
+  initScheduler()
 
   // только в dev — чтобы можно было закрыть окно
   if (is.dev) {

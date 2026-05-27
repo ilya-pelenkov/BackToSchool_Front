@@ -6,7 +6,7 @@ import { isApiError } from '../shared/request-errors'
 import { deviceApi } from './api'
 import { resetReregistrationAttempts } from './api/setup-error-handlers'
 import logger from './logger'
-import { registrationStore } from './store'
+import { deviceStore, registrationStore } from './store'
 
 export async function registerDevice(): Promise<void> {
   try {
@@ -20,7 +20,7 @@ export async function registerDevice(): Promise<void> {
       })
     })
     registrationStore.set('authToken', auth_token)
-    registrationStore.set('terminalId', terminal_id.toString())
+    deviceStore.set('terminalId', terminal_id.toString())
     registrationStore.set('isRegistered', true)
     resetReregistrationAttempts()
     logger.info('Device registered', { terminal_id })
@@ -29,11 +29,7 @@ export async function registerDevice(): Promise<void> {
     registrationStore.set('isRegistrationError', true)
 
     if (isApiError(err)) {
-      if (err.isUnauthorized) logger.warn('Device not authorized')
-      if (err.isServerError) logger.error('Backend error, retry later')
-      if (err.isTimeout) logger.warn('Registration timed out')
-      if (err.isNetworkError) logger.warn('No network connection')
-
+      logger.warn('Registration failed', { code: err.code, status: err.status })
       return
     }
 

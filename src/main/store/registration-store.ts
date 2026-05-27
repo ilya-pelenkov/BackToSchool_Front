@@ -5,7 +5,6 @@ interface RegistrationSchema {
   isRegisterLoading: boolean
   isRegistrationError: boolean
   authToken: string | null
-  terminalId: string | null
 }
 
 export const registrationStore = new Store<RegistrationSchema>({
@@ -15,6 +14,5 @@ export const registrationStore = new Store<RegistrationSchema>({
     isRegisterLoading: false,
     isRegistrationError: false,
     authToken: null,
-    terminalId: null,
   },
 })
