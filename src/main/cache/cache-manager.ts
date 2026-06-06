@@ -8,8 +8,9 @@ import type { CachedContent, Content } from '@shared/types'
 import { downloadFile } from '../api/'
 import logger from '../logger'
 import { contentStore } from '../store/content-store'
+import { getFreeSpace } from './get-free-space'
 
-const CACHE_DIR = path.join(app.getPath('userData'), 'cache')
+export const CACHE_DIR = path.join(app.getPath('userData'), 'cache')
 
 const DIRS = {
   banner: path.join(CACHE_DIR, 'banners'),
@@ -21,15 +22,19 @@ const TIMEOUT_BY_TYPE = {
   video: 120_000,
 } satisfies Record<Content['type'], number>
 
-//создание папок DIRS
-function ensureDirs(): void {
-  Object.values(DIRS).forEach(dir => fs.mkdirSync(dir, { recursive: true }))
-}
+//TODO: скорректировать после получения реальных размеров файлов и данных об устройстве
+const MIN_FREE_SPACE_BY_TYPE = {
+  banner: 25 * 1024 * 1024 * 2, //макс размер одного баннера × 2
+  video: 500 * 1024 * 1024 * 2, //макс размер одного видео × 2
+} satisfies Record<Content['type'], number>
+
+//запас для работы самого приложения — логи, electron-store, обновления
+const MIN_SYSTEM_RESERVE_BYTES = 400 * 1024 * 1024 // 400 МБ
 
 export const cacheManager = {
-  //инициализация при первом запуске приложения
+  //инициализация при первом запуске приложения - создание папок для кэширования
   init(): void {
-    ensureDirs()
+    Object.values(DIRS).forEach(dir => fs.mkdirSync(dir, { recursive: true }))
     logger.info('CacheManager initialized', { cacheDir: CACHE_DIR })
   },
 
@@ -55,6 +60,20 @@ export const cacheManager = {
 
   //скачивание и кэширование одного файла
   async download(item: Content): Promise<void> {
+    /* сначала - проверка свободного места на диске, если не хватает - файл не скачивается */
+    const freeSpace = await getFreeSpace()
+    const required = MIN_FREE_SPACE_BY_TYPE[item.type] + MIN_SYSTEM_RESERVE_BYTES
+
+    if (freeSpace < required) {
+      logger.warn('Skipping download due to low disk space', {
+        id: item.id,
+        type: item.type,
+        freeMB: Math.round(freeSpace / 1024 / 1024),
+        requiredMB: Math.round(required / 1024 / 1024),
+      })
+      return
+    }
+
     const basePath = path.join(DIRS[item.type], `${item.id}`)
 
     logger.info('Downloading content', { id: item.id, type: item.type })

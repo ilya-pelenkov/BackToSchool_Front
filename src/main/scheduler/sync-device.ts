@@ -16,7 +16,7 @@ async function sendSync(): Promise<boolean> {
     const terminalId = deviceStore.get('terminalId')
     if (!terminalId) return false
 
-    const lastSync = contentStore.get('lastSync')
+    const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString
     const res = await deviceApi.sync(String(terminalId), lastSync)
 
     await cacheManager.sync(res.content)
