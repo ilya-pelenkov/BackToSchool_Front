@@ -3,7 +3,7 @@ import { ApiError } from '@shared/request-errors'
 import logger from '../logger'
 import { registrationStore } from '../store'
 import { runErrorHandlers } from './error-handlers'
-import { RetryPreset, calcDelay, getRetryOptions } from './retry'
+import { RetryPreset, calcDelay, getRetryOptions, sleep } from './retry'
 
 const BASE_URL = import.meta.env.MAIN_VITE_API_URL
 
@@ -131,11 +131,6 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   }
 
   throw lastError
-}
-
-// Хелперы
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 /** Разбираем Retry-After: число секунд или HTTP-date */

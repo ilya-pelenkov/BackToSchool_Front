@@ -24,3 +24,8 @@ export function calcDelay(attempt: number, opts: RetryOptions): number {
   const cap = Math.min(exponential, opts.maxDelay)
   return Math.random() * cap
 }
+
+// Хелперы
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
