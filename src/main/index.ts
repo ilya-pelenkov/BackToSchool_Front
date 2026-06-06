@@ -4,11 +4,11 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { is } from '@electron-toolkit/utils'
 import { pathToFileURL } from 'url'
 
-import { runHeartbeat, shouldSendHeartbeatOnStart } from './heartbeat'
-import { registerIpcHandlers } from './ipc/ipc'
+import { cacheManager } from './cache'
+import { registerIpcHandlers } from './ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
 import { registerDevice } from './registration'
-import { initScheduler } from './scheduler'
+import { initScheduler, runHeartbeat, runSync, shouldSendHeartbeatOnStart, shouldSyncOnStart } from './scheduler'
 import { deviceStore, registrationStore } from './store'
 import { createWindow } from './window'
 
@@ -28,6 +28,8 @@ app.whenReady().then(async () => {
   const win = createWindow()
   registerSecurityHandlers(win)
 
+  cacheManager.init()
+
   //проверка регистрации устройства - если нет данных, то отправялется запрос на регистрацию
   const authToken = registrationStore.get('authToken')
   const terminalId = deviceStore.get('terminalId')
@@ -35,10 +37,12 @@ app.whenReady().then(async () => {
     // ждём регистрацию, потом heartbeat и sync при необходимости
     registerDevice().then(() => {
       if (shouldSendHeartbeatOnStart()) runHeartbeat()
+      if (shouldSyncOnStart()) runSync()
     })
   } else {
     // уже есть регистрация — сразу heartbeat и sync при необходимости
     if (shouldSendHeartbeatOnStart()) runHeartbeat()
+    if (shouldSyncOnStart()) runSync()
   }
 
   initScheduler()
