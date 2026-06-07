@@ -7,7 +7,7 @@ import { TMediaIpcGetFiles } from '@shared/types'
 
 import { networkStore, registrationStore } from '../store'
 
-const CACHED_DIR = join(app.getPath('userData'), 'cached')
+const CACHED_DIR = join(app.getPath('userData'), 'cache', 'banners')
 
 const SUPPORTED_EXTENSIONS = ['.mp4', '.jpg', '.jpeg', '.png', '.webp'] //TODO: продумать поддерживаемые файлы
 
