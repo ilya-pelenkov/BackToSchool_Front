@@ -9,7 +9,7 @@ export type Content = {
     days_of_week: string[]
   }
   target_url: string
-  qr_code_url: string
+  qr_code_base64: string
 }
 
 export type CachedContent = {
@@ -21,6 +21,6 @@ export type CachedContent = {
   downloadedAt: string
   duration: number
   schedule: Content['schedule']
-  qr_code_url?: string
+  qr_code_base64?: string
   qr_code_svg?: string
 }

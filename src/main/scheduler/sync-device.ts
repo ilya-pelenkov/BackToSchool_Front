@@ -26,12 +26,12 @@ const MOCK_SYNC_RESPONSE = {
         days_of_week: ['1', '2', '3', '4', '5'],
       },
       target_url: '',
-      qr_code_url: '',
+      qr_code_base64: '',
     },
     {
       id: 2,
       type: 'video' as const,
-      url: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4',
+      url: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720',
       duration: 10,
       schedule: {
         start_time: '07:00:00.000Z',
@@ -39,7 +39,20 @@ const MOCK_SYNC_RESPONSE = {
         days_of_week: ['1', '2', '3', '4', '5'],
       },
       target_url: '',
-      qr_code_url: '',
+      qr_code_base64: '',
+    },
+    {
+      id: 3,
+      type: 'banner' as const,
+      url: 'https://i.pinimg.com/736x/49/76/48/49764810251d8887b7669b38ff43d632.jpg',
+      duration: 10,
+      schedule: {
+        start_time: '07:00:00.000Z',
+        end_time: '22:00:00.000Z',
+        days_of_week: ['1', '2', '3', '4', '5'],
+      },
+      target_url: '',
+      qr_code_base64: '',
     },
   ],
   config: { payload: '' },
@@ -90,6 +103,8 @@ export async function runSync(retryCount = 0): Promise<void> {
 // проверка, нужна ли синхронизация при старте
 export function shouldSyncOnStart(): boolean {
   const lastSync = contentStore.get('lastSync')
-  if (!lastSync) return true
+  const items = contentStore.get('items')
+
+  if (!lastSync || Object.keys(items).length === 0) return true
   return Date.now() - new Date(lastSync).getTime() >= SYNC_INTERVAL_MS
 }

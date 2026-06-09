@@ -92,7 +92,7 @@ export const cacheManager = {
         downloadedAt: new Date().toISOString(),
         duration: item.duration,
         schedule: item.schedule,
-        qr_code_url: item.qr_code_url || undefined,
+        qr_code_base64: item.qr_code_base64 || undefined,
       }
 
       const items = contentStore.get('items')
