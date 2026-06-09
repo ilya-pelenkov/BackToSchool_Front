@@ -2,12 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import { TMediaIpcGetFiles } from '@shared/types'
 
-import QrExample from '../../assets/QR_code_for_mobile_English_Wikipedia.svg'
 import { MediaPlayer } from '../media-player'
 import { Modal, QrButton } from '../ui'
-
-const IMAGE_DURATION = 5000 //TODO: получать из расписания отдельным запросом к main
-//TODO: получать qr для каждого медиа отдельным запросом к main
 
 export function MediaPlaylist() {
   const [files, setFiles] = useState<TMediaIpcGetFiles>([])
@@ -16,8 +12,14 @@ export function MediaPlaylist() {
   const [isPaused, setIsPaused] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
+  const loadFiles = (): void => {
     window.api.media.getFiles().then(setFiles) //TODO: обработка ошибки
+  }
+
+  useEffect(() => {
+    loadFiles()
+    const unsubscribe = window.api.media.onUpdated(loadFiles)
+    return unsubscribe
   }, [])
 
   const goNext = (): void => {
@@ -44,22 +46,22 @@ export function MediaPlaylist() {
     setIsModalOpen(false)
   }
 
-  if (!files.length) return <p>Нет файлов в папке cached</p> //TODO: продумать заглушку
+  if (!files.length) return <p>Нет файлов для воспроизведения</p> //TODO: продумать заглушку
+  const currentFile = files[currentIndex]
+  const nextFile = files[(currentIndex + 1) % files.length]
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <MediaPlayer
-        file={{ ...files[currentIndex], duration: IMAGE_DURATION }}
-        nextFile={{ ...files[(currentIndex + 1) % files.length], duration: IMAGE_DURATION }}
-        onEnded={goNext}
-        onError={handleError}
-        isPaused={isPaused}
-      />
+      <MediaPlayer file={currentFile} nextFile={nextFile} onEnded={goNext} onError={handleError} isPaused={isPaused} />
       <QrButton onClick={openModal} content={'QR'} />
       {isModalOpen && (
         <Modal onClose={closeModal}>
-          {QrExample ? (
-            <img src={QrExample} alt="QR код" style={{ width: 240, height: 240 }} />
+          {currentFile.qr_code_base64 ? (
+            <img
+              src={`data:image/svg+xml;base64,${currentFile.qr_code_base64}`}
+              alt="QR код"
+              style={{ width: 240, height: 240 }}
+            />
           ) : (
             <p>QR код недоступен</p>
           )}
