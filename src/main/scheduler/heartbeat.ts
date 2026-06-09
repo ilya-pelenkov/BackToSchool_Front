@@ -1,8 +1,8 @@
 import { isApiError } from '@shared/request-errors'
 
-import { deviceApi } from './api'
-import logger from './logger'
-import { deviceStore } from './store'
+import { deviceApi } from '../api'
+import logger from '../logger'
+import { deviceStore } from '../store'
 
 const HEARTBEAT_RETRY_DELAY_MS = 5 * 60 * 1000
 const MAX_HEARTBEAT_RETRIES = 1
