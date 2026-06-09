@@ -1,15 +1,9 @@
-import { app, ipcMain } from 'electron'
-
-import { readdirSync } from 'fs'
-import { join } from 'path'
+import { ipcMain } from 'electron'
 
 import { TMediaIpcGetFiles } from '@shared/types'
 
+import { cacheManager } from '../cache'
 import { networkStore, registrationStore } from '../store'
-
-const CACHED_DIR = join(app.getPath('userData'), 'cache', 'banners')
-
-const SUPPORTED_EXTENSIONS = ['.mp4', '.jpg', '.jpeg', '.png', '.webp'] //TODO: продумать поддерживаемые файлы
 
 export function registerIpcHandlers(): void {
   //Состояние регистрации
@@ -24,14 +18,13 @@ export function registerIpcHandlers(): void {
 
   //Получение медиа файлов для отображения
   ipcMain.handle('media:getFiles', (): TMediaIpcGetFiles => {
-    const files = readdirSync(CACHED_DIR)
-      .filter(f => SUPPORTED_EXTENSIONS.some(ext => f.toLowerCase().endsWith(ext)))
-      .map(f => ({
-        name: f,
-        path: `media://${join(CACHED_DIR, f)}`,
-        type: f.match(/\.(mp4|mov)$/i) ? 'video' : ('image' as 'video' | 'image'),
-      }))
-    return files
+    return cacheManager.getAll().map(item => ({
+      contentId: item.contentId,
+      path: `media://${item.localPath}`,
+      type: item.type,
+      duration: item.duration,
+      qr_code_base64: item.qr_code_base64,
+    }))
   })
 
   //Cостояние сети (онлайн/оффлайн)

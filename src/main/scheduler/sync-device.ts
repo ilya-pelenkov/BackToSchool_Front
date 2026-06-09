@@ -1,10 +1,11 @@
 import { isApiError } from '@shared/request-errors'
 
-import { deviceApi } from '../api'
+// import { deviceApi } from '../api'
 import { cacheManager } from '../cache/cache-manager'
 import logger from '../logger'
 import { deviceStore } from '../store'
 import { contentStore } from '../store/content-store'
+import { sendToRenderer } from '../window'
 
 const SYNC_RETRY_DELAY_MS = 5 * 60 * 1000
 const MAX_SYNC_RETRIES = 3
@@ -64,14 +65,14 @@ async function sendSync(): Promise<boolean> {
     const terminalId = deviceStore.get('terminalId')
     if (!terminalId) return false
 
-    const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString()
+    // const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString()
     // TODO: заменить на реальный запрос
     // const res = await deviceApi.sync(String(terminalId), lastSync)
     const res = MOCK_SYNC_RESPONSE
 
     await cacheManager.sync(res.content)
     contentStore.set('lastSync', res.sync_time)
-
+    sendToRenderer('media:updated')
     return true
   } catch (err) {
     if (isApiError(err)) {
