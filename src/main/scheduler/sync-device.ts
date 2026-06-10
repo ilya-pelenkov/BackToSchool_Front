@@ -10,6 +10,7 @@ import { sendToRenderer } from '../window'
 const SYNC_RETRY_DELAY_MS = 5 * 60 * 1000
 const MAX_SYNC_RETRIES = 3
 const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 часа
+const EMPTY_CONTENT_RETRY_MS = 2 * 60 * 60 * 1000 // 2 часа
 
 // TODO: убрать мок
 const MOCK_SYNC_RESPONSE = {
@@ -75,6 +76,12 @@ async function sendSync(): Promise<boolean> {
 
     await cacheManager.sync(res.content)
     contentStore.set('lastSync', res.sync_time)
+
+    if (res.content.length === 0) {
+      logger.warn(`Sync returned empty content, will retry in ${EMPTY_CONTENT_RETRY_MS / (60 * 60 * 1000)} hours`)
+      setTimeout(() => runSync(), EMPTY_CONTENT_RETRY_MS)
+    }
+
     sendToRenderer('media:updated')
     if (isFirstSync) sendToRenderer('media:firstSyncFinished')
     return true

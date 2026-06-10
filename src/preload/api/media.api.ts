@@ -18,4 +18,5 @@ export const mediaApi = {
   onFirstSyncFinished: (callback: () => void): void => {
     ipcRenderer.on('media:firstSyncFinished', callback)
   },
+  requestForceSync: (): Promise<void> => ipcRenderer.invoke('media:requestSync'),
 }

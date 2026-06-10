@@ -3,6 +3,8 @@ import { ipcMain } from 'electron'
 import { TMediaIpcGetFiles } from '@shared/types'
 
 import { cacheManager } from '../cache'
+import logger from '../logger'
+import { runSync } from '../scheduler'
 import { networkStore, registrationStore } from '../store'
 
 export function registerIpcHandlers(): void {
@@ -32,4 +34,11 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('network:getStatus', () => ({
     online: networkStore.get('isOnline'),
   }))
+
+  //удаление кэша и новый sync запрос при ошибках воспроизведения всех файлов
+  ipcMain.handle('media:requestForceSync', async () => {
+    logger.warn('Force sync requested: all files failed to play, clearing cache')
+    cacheManager.clearCache()
+    await runSync()
+  })
 }
