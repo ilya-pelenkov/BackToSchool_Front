@@ -120,8 +120,8 @@ export const cacheManager = {
     contentStore.set('items', rest)
   },
 
-  //возвращает массив данных о кэшированных файлах (для renderer)
+  //возвращает массив данных о кэшированных файлах (используется в передаче через ipc для renderer)
   getAll(): CachedContent[] {
-    return Object.values(contentStore.get('items'))
+    return Object.values(contentStore.get('items')).filter(item => fs.existsSync(item.localPath))
   },
 }

@@ -18,6 +18,7 @@ export function registerIpcHandlers(): void {
 
   //Получение медиа файлов для отображения
   ipcMain.handle('media:getFiles', (): TMediaIpcGetFiles => {
+    // TODO: добавить фильтрацию по start_time/end_time когда появится требование
     return cacheManager.getAll().map(item => ({
       contentId: item.contentId,
       path: `media://${item.localPath}`,

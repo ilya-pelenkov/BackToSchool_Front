@@ -64,6 +64,9 @@ async function sendSync(): Promise<boolean> {
   try {
     const terminalId = deviceStore.get('terminalId')
     if (!terminalId) return false
+    // проверка, есть ли уже ранее загруженный контент (для передачи состояния в renderer)
+    const isFirstSync = cacheManager.getAll().length === 0
+    if (isFirstSync) sendToRenderer('media:firstSyncStarted')
 
     // const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString()
     // TODO: заменить на реальный запрос
@@ -73,6 +76,7 @@ async function sendSync(): Promise<boolean> {
     await cacheManager.sync(res.content)
     contentStore.set('lastSync', res.sync_time)
     sendToRenderer('media:updated')
+    if (isFirstSync) sendToRenderer('media:firstSyncFinished')
     return true
   } catch (err) {
     if (isApiError(err)) {
