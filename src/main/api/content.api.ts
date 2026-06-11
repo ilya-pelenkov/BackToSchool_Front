@@ -6,5 +6,5 @@ type ClickResponse = {
 
 export const contentAPI = {
   click: (terminalId: string, contentId: number) =>
-    apiClient.post<ClickResponse>(`/terminals/${terminalId}/heartbeat/`, { content_id: contentId }),
+    apiClient.post<ClickResponse>(`/terminals/${terminalId}/click/`, { content_id: contentId }),
 }
