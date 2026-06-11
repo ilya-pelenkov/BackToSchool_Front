@@ -1,15 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-interface MediaFile {
-  name: string
-  path: string
-  type: 'video' | 'image'
-  duration: number
-}
+import { TMediaFile } from '@shared/types/ipc'
 
 interface MediaPlayerProps {
-  file: MediaFile
-  nextFile: MediaFile
+  file: TMediaFile
+  nextFile: TMediaFile
   onEnded: () => void
   onError: () => void
   isPaused: boolean
@@ -28,7 +23,7 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
   const isFading = useRef(false)
 
   useEffect(() => {
-    if (file.type !== 'image') return
+    if (file.type !== 'banner') return
     if (isFading.current) return
     setSlots({ current: file.path, next: nextFile?.path })
   }, [file, nextFile?.path])
@@ -48,9 +43,9 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
 
   //TODO: после паузы таймер для картинок запускается заново (не продолжается)
   useEffect(() => {
-    if (file.type !== 'image') return
+    if (file.type !== 'banner') return
     if (isPaused) return
-    const timer = setTimeout(handleFade, file.duration - TRANSITION_DURATION_MS)
+    const timer = setTimeout(handleFade, file.duration * 1000 - TRANSITION_DURATION_MS)
     return () => clearTimeout(timer)
   }, [file, isPaused, handleFade])
 
@@ -102,7 +97,7 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
           transition: `opacity ${TRANSITION_DURATION_SEC}s ease-in-out`,
         }}
       />
-      {slots.next && nextFile?.type === 'image' && (
+      {slots.next && nextFile?.type === 'banner' && (
         <img
           key={slots.next}
           src={slots.next}

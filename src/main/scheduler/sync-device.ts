@@ -1,14 +1,16 @@
 import { isApiError } from '@shared/request-errors'
 
-import { deviceApi } from '../api'
+// import { deviceApi } from '../api'
 import { cacheManager } from '../cache/cache-manager'
 import logger from '../logger'
 import { deviceStore } from '../store'
 import { contentStore } from '../store/content-store'
+import { sendToRenderer } from '../window'
 
 const SYNC_RETRY_DELAY_MS = 5 * 60 * 1000
 const MAX_SYNC_RETRIES = 3
 const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 часа
+const EMPTY_CONTENT_RETRY_MS = 2 * 60 * 60 * 1000 // 2 часа
 
 // TODO: убрать мок
 const MOCK_SYNC_RESPONSE = {
@@ -63,8 +65,11 @@ async function sendSync(): Promise<boolean> {
   try {
     const terminalId = deviceStore.get('terminalId')
     if (!terminalId) return false
+    // проверка, есть ли уже ранее загруженный контент (для передачи состояния в renderer)
+    const isFirstSync = cacheManager.getAll().length === 0
+    if (isFirstSync) sendToRenderer('media:firstSyncStarted')
 
-    const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString()
+    // const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString()
     // TODO: заменить на реальный запрос
     // const res = await deviceApi.sync(String(terminalId), lastSync)
     const res = MOCK_SYNC_RESPONSE
@@ -72,6 +77,13 @@ async function sendSync(): Promise<boolean> {
     await cacheManager.sync(res.content)
     contentStore.set('lastSync', res.sync_time)
 
+    if (res.content.length === 0) {
+      logger.warn(`Sync returned empty content, will retry in ${EMPTY_CONTENT_RETRY_MS / (60 * 60 * 1000)} hours`)
+      setTimeout(() => runSync(), EMPTY_CONTENT_RETRY_MS)
+    }
+
+    sendToRenderer('media:updated')
+    if (isFirstSync) sendToRenderer('media:firstSyncFinished')
     return true
   } catch (err) {
     if (isApiError(err)) {

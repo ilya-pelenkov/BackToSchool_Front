@@ -22,7 +22,7 @@ const TIMEOUT_BY_TYPE = {
   video: 120_000,
 } satisfies Record<Content['type'], number>
 
-//TODO: скорректировать после получения реальных размеров файлов и данных об устройстве
+//TODO: скорректировать после получения реальных размеров файлов
 const MIN_FREE_SPACE_BY_TYPE = {
   banner: 25 * 1024 * 1024 * 2, //макс размер одного баннера × 2
   video: 500 * 1024 * 1024 * 2, //макс размер одного видео × 2
@@ -34,7 +34,18 @@ const MIN_SYSTEM_RESERVE_BYTES = 400 * 1024 * 1024 // 400 МБ
 export const cacheManager = {
   //инициализация при первом запуске приложения - создание папок для кэширования
   init(): void {
-    Object.values(DIRS).forEach(dir => fs.mkdirSync(dir, { recursive: true }))
+    Object.values(DIRS).forEach(dir => {
+      fs.mkdirSync(dir, { recursive: true })
+
+      // очистка временных файлов от прерванных загрузок
+      fs.readdirSync(dir)
+        .filter(f => f.endsWith('.tmp'))
+        .forEach(f => {
+          fs.unlinkSync(path.join(dir, f))
+          logger.info('Removed incomplete download', { file: f })
+        })
+    })
+
     logger.info('CacheManager initialized', { cacheDir: CACHE_DIR })
   },
 
@@ -120,8 +131,17 @@ export const cacheManager = {
     contentStore.set('items', rest)
   },
 
-  //возвращает массив данных о кэшированных файлах (для renderer)
+  //возвращает массив данных о кэшированных файлах (используется в передаче через ipc для renderer)
   getAll(): CachedContent[] {
-    return Object.values(contentStore.get('items'))
+    return Object.values(contentStore.get('items')).filter(item => fs.existsSync(item.localPath))
+  },
+
+  //удаление закэшированных файлов и очистка contentStore
+  clearCache(): void {
+    Object.values(contentStore.get('items')).forEach(item => {
+      if (fs.existsSync(item.localPath)) fs.unlinkSync(item.localPath)
+    })
+    contentStore.set('items', {})
+    logger.info('Cache cleared')
   },
 }

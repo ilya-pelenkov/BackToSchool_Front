@@ -22,5 +22,4 @@ export type CachedContent = {
   duration: number
   schedule: Content['schedule']
   qr_code_base64?: string
-  qr_code_svg?: string
 }

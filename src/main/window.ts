@@ -41,3 +41,7 @@ export function createWindow(): BrowserWindow {
 
   return mainWindow
 }
+
+export function sendToRenderer(channel: string, payload?: unknown): void {
+  BrowserWindow.getAllWindows()[0]?.webContents.send(channel, payload)
+}
