@@ -6,3 +6,11 @@ export type TMediaFile = Pick<CachedContent, 'contentId' | 'duration' | 'qr_code
 }
 
 export type TMediaIpcGetFiles = TMediaFile[]
+
+export const MEDIA_IPC_CHANNELS = {
+  CONTENT_CLICK: 'content:click',
+} as const
+
+export type ContentClickPayload = {
+  contentId: number
+}

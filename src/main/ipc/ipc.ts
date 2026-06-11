@@ -1,11 +1,14 @@
 import { ipcMain } from 'electron'
 
+import { isApiError } from '@shared/request-errors'
 import { TMediaIpcGetFiles } from '@shared/types'
+import { ContentClickPayload, MEDIA_IPC_CHANNELS } from '@shared/types/ipc'
 
+import { contentAPI } from '../api/content.api'
 import { cacheManager } from '../cache'
 import logger from '../logger'
 import { runSync } from '../scheduler'
-import { networkStore, registrationStore } from '../store'
+import { deviceStore, networkStore, registrationStore } from '../store'
 
 export function registerIpcHandlers(): void {
   //Состояние регистрации
@@ -40,5 +43,21 @@ export function registerIpcHandlers(): void {
     logger.warn('Force sync requested: all files failed to play, clearing cache')
     cacheManager.clearCache()
     await runSync()
+  })
+
+  //обработка клика по контенту - отправка POST запроса
+  ipcMain.on(MEDIA_IPC_CHANNELS.CONTENT_CLICK, async (_event, payload: ContentClickPayload) => {
+    const deviceId = deviceStore.get('terminalId')
+    if (!deviceId) return
+    try {
+      await contentAPI.click(deviceId, payload.contentId)
+      logger.info('POST /click success', payload.contentId)
+    } catch (err) {
+      if (isApiError(err)) {
+        logger.error('POST /click failure', { code: err.code, status: err.status, message: err.message })
+        return
+      }
+      logger.error('Unexpected POST /click failure', { error: (err as Error).message })
+    }
   })
 }
