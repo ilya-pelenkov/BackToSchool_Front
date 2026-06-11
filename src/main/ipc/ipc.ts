@@ -1,25 +1,48 @@
 import { ipcMain } from 'electron'
 
-import { TMediaIpcGetFiles } from '@shared/types'
+import { isApiError } from '@shared/request-errors'
+import {
+  ContentClickPayload,
+  DEVICE_IPC_CHANNELS,
+  MEDIA_IPC_CHANNELS,
+  NETWORK_IPC_CHANNELS,
+  NetworkStatusPayload,
+  RegistrationStatusPayload,
+  TMediaIpcGetFiles,
+} from '@shared/types/ipc'
 
+import { contentAPI } from '../api/content.api'
 import { cacheManager } from '../cache'
 import logger from '../logger'
 import { runSync } from '../scheduler'
-import { networkStore, registrationStore } from '../store'
+import { deviceStore, networkStore, registrationStore } from '../store'
 
 export function registerIpcHandlers(): void {
-  //Состояние регистрации
-  ipcMain.handle('device:isRegistered', (): boolean => {
+  //Состояние isRegistered
+  ipcMain.handle(DEVICE_IPC_CHANNELS.IS_REGISTERED, (): boolean => {
     return registrationStore.get('isRegistered')
   })
-  ipcMain.handle('device:getRegistrationStatus', () => ({
-    isLoading: registrationStore.get('isRegisterLoading') ?? false,
-    isRegistered: registrationStore.get('isRegistered') ?? false,
-    isError: registrationStore.get('isRegistrationError') ?? false,
-  }))
+
+  //Полное состояние регистрации
+  ipcMain.handle(
+    DEVICE_IPC_CHANNELS.GET_REGISTRATION_STATUS,
+    (): RegistrationStatusPayload => ({
+      isLoading: registrationStore.get('isRegisterLoading') ?? false,
+      isRegistered: registrationStore.get('isRegistered') ?? false,
+      isError: registrationStore.get('isRegistrationError') ?? false,
+    })
+  )
+
+  //Cостояние сети (онлайн/оффлайн)
+  ipcMain.handle(
+    NETWORK_IPC_CHANNELS.GET_STATUS,
+    (): NetworkStatusPayload => ({
+      online: networkStore.get('isOnline'),
+    })
+  )
 
   //Получение медиа файлов для отображения
-  ipcMain.handle('media:getFiles', (): TMediaIpcGetFiles => {
+  ipcMain.handle(MEDIA_IPC_CHANNELS.GET_FILES, (): TMediaIpcGetFiles => {
     // TODO: добавить фильтрацию по start_time/end_time когда появится требование
     return cacheManager.getAll().map(item => ({
       contentId: item.contentId,
@@ -30,15 +53,27 @@ export function registerIpcHandlers(): void {
     }))
   })
 
-  //Cостояние сети (онлайн/оффлайн)
-  ipcMain.handle('network:getStatus', () => ({
-    online: networkStore.get('isOnline'),
-  }))
-
   //удаление кэша и новый sync запрос при ошибках воспроизведения всех файлов
-  ipcMain.handle('media:requestForceSync', async () => {
+  ipcMain.handle(MEDIA_IPC_CHANNELS.REQUEST_FORCE_SYNC, async () => {
     logger.warn('Force sync requested: all files failed to play, clearing cache')
     cacheManager.clearCache()
     await runSync()
+  })
+
+  //обработка клика по контенту - отправка POST запроса
+  ipcMain.on(MEDIA_IPC_CHANNELS.CONTENT_CLICK, async (_event, payload: ContentClickPayload) => {
+    logger.info('received click ipc from renderer')
+    const deviceId = deviceStore.get('terminalId')
+    if (!deviceId) return
+    try {
+      await contentAPI.click(deviceId, payload.contentId)
+      logger.info('POST /click success', payload.contentId)
+    } catch (err) {
+      if (isApiError(err)) {
+        logger.error('POST /click failure', { code: err.code, status: err.status, message: err.message })
+        return
+      }
+      logger.error('Unexpected POST /click failure', { error: (err as Error).message })
+    }
   })
 }

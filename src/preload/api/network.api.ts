@@ -1,15 +1,13 @@
 import { ipcRenderer } from 'electron'
 
-export interface NetworkStatus {
-  online: boolean
-}
+import { NETWORK_IPC_CHANNELS, NetworkStatusPayload } from '@shared/types/ipc'
 
 export const networkApi = {
-  //однократное получение
-  getStatus: (): Promise<NetworkStatus> => ipcRenderer.invoke('network:getStatus'),
+  //однократное получение статуса сети
+  getStatus: (): Promise<NetworkStatusPayload> => ipcRenderer.invoke(NETWORK_IPC_CHANNELS.GET_STATUS),
 
-  //подписка на изменение
-  onStatusChange: (cb: (status: NetworkStatus) => void): void => {
-    ipcRenderer.on('network:status', (_, status) => cb(status))
+  //подписка на изменение статуса сети
+  onStatusChange: (cb: (status: NetworkStatusPayload) => void): void => {
+    ipcRenderer.on(NETWORK_IPC_CHANNELS.STATUS_CHANGE, (_, status) => cb(status))
   },
 }

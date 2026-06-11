@@ -64,6 +64,11 @@ export function MediaPlaylist() {
     setIsModalOpen(false)
   }
 
+  const onQrButtonClick = (contentId: number): void => {
+    window.api.media.notifyContentClick({ contentId })
+    openModal()
+  }
+
   if (isLoading) return null // перед проверкой !files.length чтобы избежать лишнего редиректа
   if (!files.length) return <Navigate to={ROUTES.noContent} replace />
   const currentFile = files[currentIndex]
@@ -72,7 +77,7 @@ export function MediaPlaylist() {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <MediaPlayer file={currentFile} nextFile={nextFile} onEnded={goNext} onError={handleError} isPaused={isPaused} />
-      <QrButton onClick={openModal} content={'QR'} />
+      <QrButton onClick={() => onQrButtonClick(currentFile.contentId)} content={'QR'} />
       {isModalOpen && (
         <Modal onClose={closeModal}>
           {currentFile.qr_code_base64 ? (
