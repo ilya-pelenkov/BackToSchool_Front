@@ -11,8 +11,8 @@ export function Modal({ onClose, children }: ModalProps) {
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          zIndex: 20,
+          background: 'rgba(20, 20, 20, 0.8)',
+          zIndex: 200,
         }}
       />
       <div
@@ -24,7 +24,7 @@ export function Modal({ onClose, children }: ModalProps) {
           background: '#fff',
           borderRadius: 12,
           padding: 32,
-          zIndex: 30,
+          zIndex: 300,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

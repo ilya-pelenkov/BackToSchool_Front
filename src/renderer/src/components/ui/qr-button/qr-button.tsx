@@ -16,7 +16,7 @@ export function QrButton({ onClick, content }: QrButtonProps) {
         bottom: 24,
         left: '50%',
         transform: 'translate(-50%, 0)',
-        zIndex: 100,
+        zIndex: 30,
         border: '3px solid transparent',
         color: 'white',
         fontSize: '80px',
