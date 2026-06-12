@@ -12,9 +12,9 @@ export function CommonLayout({ header }: TCommonLayoutProps) {
     <AppShell
       header={{ height: '345px' }} //9% от фиксированной высоты окна
     >
-      <AppShell.Header c="black">{header}</AppShell.Header>
+      <AppShell.Header c="transparent">{header}</AppShell.Header>
 
-      <AppShell.Main style={{ height: '3495px' }}>
+      <AppShell.Main style={{ height: '3495px', backgroundColor: 'var(--mantine-color-baseColor-9)' }}>
         <ScrollArea style={{ height: '3495px', width: '100%' }}>
           <Outlet />
         </ScrollArea>
