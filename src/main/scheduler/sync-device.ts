@@ -1,6 +1,6 @@
 import { isApiError } from '@shared/request-errors'
 
-// import { deviceApi } from '../api'
+import { deviceApi } from '../api'
 import { cacheManager } from '../cache/cache-manager'
 import logger from '../logger'
 import { deviceStore } from '../store'
@@ -12,54 +12,6 @@ const MAX_SYNC_RETRIES = 3
 const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 часа
 const EMPTY_CONTENT_RETRY_MS = 2 * 60 * 60 * 1000 // 2 часа
 
-// TODO: убрать мок
-const MOCK_SYNC_RESPONSE = {
-  terminal_id: 1,
-  sync_time: new Date().toISOString(),
-  content: [
-    {
-      id: 1,
-      type: 'banner' as const,
-      url: 'https://i.pinimg.com/736x/49/76/48/49764810251d8887b7669b38ff43d632.jpg',
-      duration: 10,
-      schedule: {
-        start_time: '07:00:00.000Z',
-        end_time: '22:00:00.000Z',
-        days_of_week: ['1', '2', '3', '4', '5'],
-      },
-      target_url: '',
-      qr_code_base64: '',
-    },
-    {
-      id: 2,
-      type: 'video' as const,
-      url: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720',
-      duration: 10,
-      schedule: {
-        start_time: '07:00:00.000Z',
-        end_time: '22:00:00.000Z',
-        days_of_week: ['1', '2', '3', '4', '5'],
-      },
-      target_url: '',
-      qr_code_base64: '',
-    },
-    {
-      id: 3,
-      type: 'banner' as const,
-      url: 'https://i.pinimg.com/736x/49/76/48/49764810251d8887b7669b38ff43d632.jpg',
-      duration: 10,
-      schedule: {
-        start_time: '07:00:00.000Z',
-        end_time: '22:00:00.000Z',
-        days_of_week: ['1', '2', '3', '4', '5'],
-      },
-      target_url: '',
-      qr_code_base64: '',
-    },
-  ],
-  config: { payload: '' },
-}
-
 // однократный запрос
 async function sendSync(): Promise<boolean> {
   try {
@@ -69,10 +21,8 @@ async function sendSync(): Promise<boolean> {
     const isFirstSync = cacheManager.getAll().length === 0
     if (isFirstSync) sendToRenderer('media:firstSyncStarted')
 
-    // const lastSync = contentStore.get('lastSync') ?? new Date(Date.now()).toISOString()
-    // TODO: заменить на реальный запрос
-    // const res = await deviceApi.sync(String(terminalId), lastSync)
-    const res = MOCK_SYNC_RESPONSE
+    const lastSync = contentStore.get('lastSync') || new Date(Date.now()).toISOString()
+    const res = await deviceApi.sync(String(terminalId), lastSync)
 
     await cacheManager.sync(res.content)
     contentStore.set('lastSync', res.sync_time)
@@ -83,6 +33,7 @@ async function sendSync(): Promise<boolean> {
     }
 
     sendToRenderer('media:updated')
+    logger.info('POST /sync success')
     if (isFirstSync) sendToRenderer('media:firstSyncFinished')
     return true
   } catch (err) {
