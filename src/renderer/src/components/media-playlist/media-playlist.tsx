@@ -82,7 +82,7 @@ export function MediaPlaylist() {
         <Modal onClose={closeModal}>
           {currentFile.qr_code_base64 ? (
             <img
-              src={`data:image/svg+xml;base64,${currentFile.qr_code_base64}`}
+              src={`data:image/png;base64,${currentFile.qr_code_base64}`}
               alt="QR код"
               style={{ width: 240, height: 240 }}
             />

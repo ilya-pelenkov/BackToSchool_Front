@@ -35,9 +35,29 @@ async function fetchOnce<T>(endpoint: string, options: RequestOptions): Promise<
     if (!res.ok) {
       const retryAfterMs = res.status === 429 ? parseRetryAfter(res.headers.get('Retry-After')) : undefined
 
+      let serverMessage: string | undefined
+      try {
+        const contentType = res.headers.get('Content-Type') ?? ''
+        if (contentType.includes('application/json')) {
+          const body = await res.json()
+          if (typeof body === 'object' && body !== null) {
+            const b = body as Record<string, unknown>
+            const msg = b['message'] ?? b['error']
+            serverMessage = typeof msg === 'string' ? msg : JSON.stringify(body)
+          } else {
+            serverMessage = String(body)
+          }
+        } else {
+          const text = await res.text()
+          if (text) serverMessage = text
+        }
+      } catch {
+        // catch чтобы не маскировать ошибку с сервера
+      }
+
       throw new ApiError({
         code: 'HTTP_ERROR',
-        message: `HTTP ${res.status}`,
+        message: serverMessage ?? `HTTP ${res.status}`,
         status: res.status,
         endpoint,
         retryAfterMs,
@@ -107,6 +127,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
           endpoint,
           code: apiError.code,
           status: apiError.status,
+          message: apiError.message,
           attempt,
           retryable: apiError.retryable,
         })

@@ -30,6 +30,8 @@ app.whenReady().then(async () => {
 
   cacheManager.init()
 
+  // if (is.dev) registrationStore.clear() //- для тестирования, TODO: удалить
+
   //проверка регистрации устройства - если нет данных, то отправялется запрос на регистрацию
   const authToken = registrationStore.get('authToken')
   const terminalId = deviceStore.get('terminalId')

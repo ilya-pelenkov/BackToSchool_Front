@@ -2,7 +2,7 @@ import { BrowserWindow, app, globalShortcut } from 'electron'
 
 import { is } from '@electron-toolkit/utils'
 
-const CUSTOM_CLOSE_APP_HOTKEY = 'Escape'
+const CUSTOM_CLOSE_APP_HOTKEY = 'Escape' // TODO: продумать клавишу для закрытия приложения
 
 export function registerSecurityHandlers(win: BrowserWindow): void {
   // кастомный hotkey для закрытия приложения - срабатывает при повторном нажатии в течение 3000мс (3 сек)
