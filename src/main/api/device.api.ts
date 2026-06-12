@@ -31,7 +31,7 @@ export const deviceApi = {
   register: (deviceKey: string, onRetry?: (attempt: number, maxAttempts: number) => void) =>
     apiClient.post<RegisterResponse>(
       '/terminals/register/',
-      { serial_number: deviceKey, secret_key: '57rstRyCkWN2K6Hj2jwASW55lRH1B4nvLX2zrsL8lc4' },
+      { device_key: deviceKey },
       { retry: 'critical', timeout: 15_000, onRetry }
     ),
   heartbeat: (terminalId: string, uptime: number) =>
