@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router'
 
 import { DeviceProvider, NetworkProvider, SyncProvider, ThemeProvider } from './app/providers'
 import { router } from './app/router/router'
+import './styles/fonts.css'
 import './styles/main.css'
 
 import '@mantine/core/styles.css'
