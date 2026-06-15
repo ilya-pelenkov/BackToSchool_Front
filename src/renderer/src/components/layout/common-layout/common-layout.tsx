@@ -10,12 +10,12 @@ type TCommonLayoutProps = {
 export function CommonLayout({ header }: TCommonLayoutProps) {
   return (
     <AppShell
-      header={{ height: '10vh' }} //10% от фиксированной высоты окна
+      header={{ height: '345px' }} //9% от фиксированной высоты окна
     >
-      <AppShell.Header c="black">{header}</AppShell.Header>
+      <AppShell.Header c="transparent">{header}</AppShell.Header>
 
-      <AppShell.Main style={{ height: '90vh' }}>
-        <ScrollArea style={{ height: '90vh', width: '100%' }}>
+      <AppShell.Main style={{ height: '3495px', backgroundColor: 'var(--mantine-color-baseColor-9)' }}>
+        <ScrollArea style={{ height: '3495px', width: '100%' }}>
           <Outlet />
         </ScrollArea>
       </AppShell.Main>
