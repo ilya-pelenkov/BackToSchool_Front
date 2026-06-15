@@ -13,11 +13,10 @@ export function QrButton({ onClick, content }: QrButtonProps) {
       onClick={onClick}
       style={{
         position: 'absolute',
-        bottom: 24,
+        bottom: 160,
         left: '50%',
         transform: 'translate(-50%, 0)',
         zIndex: 30,
-        border: '3px solid transparent',
         color: 'white',
         fontSize: '80px',
         fontWeight: '600',

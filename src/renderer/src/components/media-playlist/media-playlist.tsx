@@ -77,11 +77,13 @@ export function MediaPlaylist() {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <MediaPlayer file={currentFile} nextFile={nextFile} onEnded={goNext} onError={handleError} isPaused={isPaused} />
-      <QrButton onClick={() => onQrButtonClick(currentFile.contentId)} content={'QR'} />
+      {currentFile.qr_code_base64 && (
+        <QrButton onClick={() => onQrButtonClick(currentFile.contentId)} content={'подробнее'} />
+      )}
       {isModalOpen && (
         <Modal onClose={closeModal}>
           {currentFile.qr_code_base64 ? (
-            <img src={`${currentFile.qr_code_base64}`} alt="QR код" style={{ width: 240, height: 240 }} />
+            <img src={`${currentFile.qr_code_base64}`} alt="QR код" style={{ width: 400, height: 400 }} />
           ) : (
             <p>QR код недоступен</p>
           )}

@@ -3,7 +3,14 @@ import { MediaPlaylist } from '@renderer/components/media-playlist'
 
 function IdleScreen() {
   return (
-    <div style={{ position: 'relative', width: '2160px', height: '3840px' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: '2160px',
+        height: '3840px',
+        backgroundColor: 'var(--mantine-color-baseColor-9)',
+      }}
+    >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '345px', width: '100%', zIndex: 100 }}>
         <Header />
       </div>
