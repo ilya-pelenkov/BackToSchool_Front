@@ -28,6 +28,7 @@ export function QrButton({ onClick, content }: QrButtonProps) {
             fontWeight: 600,
             textTransform: 'uppercase',
             transition: 'transform 0.1s ease',
+            boxShadow: 'color-mix(in srgb, var(--mantine-color-accentColor-5) 50%, transparent) 0 0 40px 8px',
             ...(active && {
               backgroundColor: 'var(--mantine-color-accentColor-8)',
               transform: 'scale(0.95)',

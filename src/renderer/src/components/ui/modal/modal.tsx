@@ -4,10 +4,12 @@ import { IconButton } from '../icon-button'
 
 type ModalProps = {
   onClose: () => void
-  children: React.ReactNode
+  children?: React.ReactNode
+  title: string
+  text: string
 }
 
-export function Modal({ onClose, children }: ModalProps) {
+export function Modal({ onClose, children, title, text }: ModalProps) {
   return (
     <>
       <div
@@ -45,9 +47,9 @@ export function Modal({ onClose, children }: ModalProps) {
           }}
         >
           <Title order={2} miw={'986px'} mb={'32px'}>
-            Забирай скидку по QR-коду!
+            {title}
           </Title>
-          <Text style={{ textAlign: 'center' }}>Прямая и мгновенная выгода, понятный призыв к действию.</Text>
+          <Text style={{ textAlign: 'center' }}>{text}</Text>
         </div>
         {children}
       </div>

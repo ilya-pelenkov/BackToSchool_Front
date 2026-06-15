@@ -11,7 +11,6 @@ export function Header() {
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '40px 80px',
-        zIndex: 100,
       }}
     >
       <div
