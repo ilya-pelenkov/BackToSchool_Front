@@ -21,19 +21,20 @@ export function SplashScreen({ message }: TSplashScreenProps) {
         alignItems: 'center',
         backgroundColor: 'var(--mantine-color-baseColor-9)',
         flexDirection: 'column',
-        gap: '100px',
+        gap: '150px',
+        paddingInline: '200px',
       }}
     >
       <img src={logo} alt="лого приложения"></img>
       {message && (
         <>
-          <Text c="white" fw={700}>
+          <Text c="dimmed" fw={700} fs={'72px'}>
             {message}
           </Text>
         </>
       )}
       {retryInfo && (
-        <Text c="white" fw={700}>
+        <Text c="dimmed" fw={700} fs={'72px'}>
           Подключение... попытка {retryInfo.attempt} из {retryInfo.maxAttempts}
         </Text>
       )}
