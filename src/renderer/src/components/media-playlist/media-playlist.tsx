@@ -49,6 +49,10 @@ export function MediaPlaylist() {
     errorCountRef.current = 0
   }
 
+  const goNextOnError = (): void => {
+    setCurrentIndex(i => (i + 1) % files.length)
+  }
+
   const handleError = (): void => {
     console.error('Failed to play media file', currentFile)
     errorCountRef.current += 1
@@ -58,7 +62,7 @@ export function MediaPlaylist() {
       navigate(ROUTES.noContent) // потом навигация
       return
     }
-    goNext()
+    goNextOnError()
   }
 
   const openModal = (): void => {
