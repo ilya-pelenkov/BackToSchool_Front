@@ -32,8 +32,10 @@ async function sendHeartbeat(): Promise<boolean> {
 export async function runHeartbeat(retryCount = 0): Promise<void> {
   const success = await sendHeartbeat()
 
+  if (success) logger.info('POST /heartbeat success')
+
   if (!success && retryCount < MAX_HEARTBEAT_RETRIES) {
-    logger.warn(`Heartbeat failed, retrying in ${HEARTBEAT_RETRY_DELAY_MS / 60_1000} minutes`, {
+    logger.warn(`Heartbeat failed, retrying in ${HEARTBEAT_RETRY_DELAY_MS / 60_000} minutes`, {
       retryCount: retryCount + 1,
     })
     setTimeout(() => runHeartbeat(retryCount + 1), HEARTBEAT_RETRY_DELAY_MS)
@@ -41,7 +43,7 @@ export async function runHeartbeat(retryCount = 0): Promise<void> {
   }
 
   if (!success) {
-    logger.warn('Heartbeat failed after all retries, next attempt in 1 hour')
+    logger.warn('Heartbeat failed after all retries, next attempt on schedule')
   }
 }
 

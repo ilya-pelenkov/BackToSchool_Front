@@ -9,7 +9,7 @@ import { registerIpcHandlers } from './ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
 import { registerDevice } from './registration'
 import { initScheduler, runHeartbeat, runSync, shouldSendHeartbeatOnStart, shouldSyncOnStart } from './scheduler'
-import { deviceStore, registrationStore } from './store'
+import { contentStore, deviceStore, registrationStore } from './store'
 import { createWindow } from './window'
 
 protocol.registerSchemesAsPrivileged([
@@ -29,6 +29,9 @@ app.whenReady().then(async () => {
   registerSecurityHandlers(win)
 
   cacheManager.init()
+
+  if (is.dev) registrationStore.clear() //- для тестирования регистрации, TODO: удалить
+  if (is.dev) contentStore.clear() //- для тестирования загрузки контента, TODO: удалить
 
   //проверка регистрации устройства - если нет данных, то отправялется запрос на регистрацию
   const authToken = registrationStore.get('authToken')

@@ -22,16 +22,15 @@ interface SyncResponse {
   sync_time: string // '2026-05-27T07:59:24.502Z'
   content: Content[]
   config: {
-    payload: string // TODO: видимо временная заглушка, поменять, когда изменится у бэка
+    payload: string // TODO: заменить на реальные данные, когда появятся
   }
 }
 
 export const deviceApi = {
-  //TODO: поменять регистрацию после коррекции от бэка
   register: (deviceKey: string, onRetry?: (attempt: number, maxAttempts: number) => void) =>
     apiClient.post<RegisterResponse>(
       '/terminals/register/',
-      { serial_number: deviceKey, secret_key: '57rstRyCkWN2K6Hj2jwASW55lRH1B4nvLX2zrsL8lc4' },
+      { device_key: deviceKey },
       { retry: 'critical', timeout: 15_000, onRetry }
     ),
   heartbeat: (terminalId: string, uptime: number) =>
