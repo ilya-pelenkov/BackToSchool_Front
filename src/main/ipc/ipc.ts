@@ -46,7 +46,8 @@ export function registerIpcHandlers(): void {
     // TODO: добавить фильтрацию по start_time/end_time когда появится требование
     return cacheManager.getAll().map(item => ({
       contentId: item.contentId,
-      path: `media://${item.localPath}`,
+      // path: `media://${item.localPath}`,
+      path: `media://${item.localPath.replace(/\\/g, '/').replace(':', '%3A')}`,
       type: item.type,
       duration: item.duration,
       qr_code_base64: item.qr_code_base64,
