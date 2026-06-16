@@ -67,7 +67,7 @@ export function registerIpcHandlers(): void {
     if (!deviceId) return
     try {
       await contentAPI.click(deviceId, payload.contentId)
-      logger.info('POST /click success', `content id - ${payload.contentId}`)
+      logger.info(`POST /click success, content_id: ${payload.contentId}`)
     } catch (err) {
       if (isApiError(err)) {
         logger.error('POST /click failure', { code: err.code, status: err.status, message: err.message })

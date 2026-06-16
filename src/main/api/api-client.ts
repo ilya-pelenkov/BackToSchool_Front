@@ -27,7 +27,7 @@ async function fetchOnce<T>(endpoint: string, options: RequestOptions): Promise<
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        'X-Terminal-Token': authToken,
+        'X-Terminal-Key': authToken,
         ...fetchOptions.headers,
       },
     })
