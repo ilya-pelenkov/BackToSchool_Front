@@ -36,19 +36,22 @@ app.whenReady().then(async () => {
   //проверка регистрации устройства - если нет данных, то отправялется запрос на регистрацию
   const authToken = registrationStore.get('authToken')
   const terminalId = deviceStore.get('terminalId')
-  if (!authToken || !terminalId) {
-    // ждём регистрацию, потом heartbeat и sync при необходимости
-    registerDevice().then(() => {
+
+  win.webContents.once('did-finish-load', () => {
+    if (!authToken || !terminalId) {
+      // ждём регистрацию, потом heartbeat и sync при необходимости
+      registerDevice().then(() => {
+        if (shouldSendHeartbeatOnStart()) runHeartbeat()
+        if (shouldSyncOnStart()) runSync()
+      })
+    } else {
+      // уже есть регистрация — сразу heartbeat и sync при необходимости
       if (shouldSendHeartbeatOnStart()) runHeartbeat()
       if (shouldSyncOnStart()) runSync()
-    })
-  } else {
-    // уже есть регистрация — сразу heartbeat и sync при необходимости
-    if (shouldSendHeartbeatOnStart()) runHeartbeat()
-    if (shouldSyncOnStart()) runSync()
-  }
+    }
 
-  initScheduler()
+    initScheduler()
+  })
 
   // только в dev — чтобы можно было закрыть окно
   if (is.dev) {

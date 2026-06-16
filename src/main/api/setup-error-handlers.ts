@@ -1,8 +1,11 @@
-import { BrowserWindow, net } from 'electron'
+import { net } from 'electron'
+
+import { NETWORK_IPC_CHANNELS } from '@shared/types/ipc'
 
 import logger from '../logger'
 import { registerDevice } from '../registration'
 import { deviceStore, networkStore, registrationStore } from '../store'
+import { sendToRenderer } from '../window'
 import { registerErrorHandler } from './error-handlers'
 
 let reregistrationAttempts = 0
@@ -19,7 +22,7 @@ export function setupErrorHandlers(): void {
 
     if (reregistrationAttempts >= MAX_REREGISTRATION_ATTEMPTS) {
       logger.error('Max reregistration attempts reached')
-      BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', { success: false })
+      sendToRenderer('registration:done', { success: false })
       return
     }
 
@@ -35,7 +38,7 @@ export function setupErrorHandlers(): void {
   registerErrorHandler(err => {
     if (err.isNetworkError || err.isTimeout) {
       networkStore.set('isOnline', false)
-      BrowserWindow.getAllWindows()[0]?.webContents.send('network:status', { online: false })
+      sendToRenderer(NETWORK_IPC_CHANNELS.STATUS_CHANGE, { online: false })
       logger.warn('Network unavailable')
       startNetworkPolling()
     }
@@ -53,7 +56,7 @@ function startNetworkPolling(): void {
 
     if (online) {
       networkStore.set('isOnline', true)
-      BrowserWindow.getAllWindows()[0]?.webContents.send('network:status', { online: true })
+      sendToRenderer(NETWORK_IPC_CHANNELS.STATUS_CHANGE, { online: true })
       logger.info('Network restored')
       networkPollingTimer = null
       reregistrationAttempts = 0

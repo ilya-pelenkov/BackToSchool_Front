@@ -26,6 +26,7 @@ export const router = createBrowserRouter([
   },
   {
     path: ROUTES.notRegistered,
-    element: <LazyNotRegisteredScreen />,
+    element: <CommonLayout header={<Header />} />,
+    children: [{ index: true, element: <LazyNotRegisteredScreen /> }],
   },
 ])

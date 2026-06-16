@@ -1,4 +1,5 @@
 import { isApiError } from '@shared/request-errors'
+import { MEDIA_IPC_CHANNELS } from '@shared/types/ipc'
 
 import { deviceApi } from '../api'
 import { cacheManager } from '../cache/cache-manager'
@@ -19,7 +20,7 @@ async function sendSync(): Promise<boolean> {
     if (!terminalId) return false
     // проверка, есть ли уже ранее загруженный контент (для передачи состояния в renderer)
     const isFirstSync = cacheManager.getAll().length === 0
-    if (isFirstSync) sendToRenderer('media:firstSyncStarted')
+    if (isFirstSync) sendToRenderer(MEDIA_IPC_CHANNELS.FIRST_SYNC_STARTED)
 
     const lastSync = contentStore.get('lastSync') || new Date(Date.now()).toISOString()
     const res = await deviceApi.sync(String(terminalId), lastSync)
@@ -32,9 +33,9 @@ async function sendSync(): Promise<boolean> {
       setTimeout(() => runSync(), EMPTY_CONTENT_RETRY_MS)
     }
 
-    sendToRenderer('media:updated')
+    sendToRenderer(MEDIA_IPC_CHANNELS.UPDATED)
     logger.info('POST /sync success')
-    if (isFirstSync) sendToRenderer('media:firstSyncFinished')
+    if (isFirstSync) sendToRenderer(MEDIA_IPC_CHANNELS.FIRST_SYNC_FINISHED)
     return true
   } catch (err) {
     if (isApiError(err)) {

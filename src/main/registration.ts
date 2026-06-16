@@ -1,5 +1,3 @@
-import { BrowserWindow } from 'electron'
-
 import { machineIdSync } from 'node-machine-id'
 
 import { isApiError } from '../shared/request-errors'
@@ -7,6 +5,7 @@ import { deviceApi } from './api'
 import { resetReregistrationAttempts } from './api/setup-error-handlers'
 import logger from './logger'
 import { deviceStore, registrationStore } from './store'
+import { sendToRenderer } from './window'
 
 export async function registerDevice(): Promise<void> {
   try {
@@ -14,7 +13,7 @@ export async function registerDevice(): Promise<void> {
     registrationStore.set('isRegistrationError', false)
     const deviceKey = machineIdSync()
     const { auth_token, terminal_id } = await deviceApi.register(deviceKey, (attempt, maxAttempts) => {
-      BrowserWindow.getAllWindows()[0]?.webContents.send('registration:attempt', {
+      sendToRenderer('registration:attempt', {
         attempt,
         maxAttempts,
       })
@@ -36,7 +35,7 @@ export async function registerDevice(): Promise<void> {
     logger.error('Unexpected device registration error', { error: (err as Error).message })
   } finally {
     registrationStore.set('isRegisterLoading', false)
-    BrowserWindow.getAllWindows()[0]?.webContents.send('registration:done', {
+    sendToRenderer('registration:done', {
       success: registrationStore.get('isRegistered'),
     })
   }
