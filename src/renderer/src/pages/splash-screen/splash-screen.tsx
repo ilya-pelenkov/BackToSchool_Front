@@ -28,13 +28,13 @@ export function SplashScreen({ message }: TSplashScreenProps) {
       <img src={logo} alt="лого приложения"></img>
       {message && (
         <>
-          <Text c="dimmed" fw={700} fs={'72px'}>
+          <Text c="dimmed" fw={700}>
             {message}
           </Text>
         </>
       )}
       {retryInfo && (
-        <Text c="dimmed" fw={700} fs={'72px'}>
+        <Text c="dimmed" fw={700}>
           Подключение... попытка {retryInfo.attempt} из {retryInfo.maxAttempts}
         </Text>
       )}

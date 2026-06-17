@@ -23,6 +23,10 @@ export const NETWORK_IPC_CHANNELS = {
   STATUS_CHANGE: 'network:status',
 } as const
 
+export const LOG_IPC_CHANNELS = {
+  WRITE: 'log:write',
+} as const
+
 // ─── Payload-типы ─────────────────────────────────────────────────────────────
 
 export type ContentClickPayload = {
@@ -54,3 +58,12 @@ export type TMediaFile = Pick<CachedContent, 'contentId' | 'duration' | 'qr_code
 }
 
 export type TMediaIpcGetFiles = TMediaFile[]
+
+export type RendererLogLevel = 'info' | 'warn' | 'error'
+
+export type RendererLogPayload = {
+  level: RendererLogLevel
+  message: string
+  meta?: Record<string, unknown>
+  timestamp: number
+}
