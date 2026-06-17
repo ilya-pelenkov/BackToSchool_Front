@@ -4,10 +4,12 @@ import { isApiError } from '@shared/request-errors'
 import {
   ContentClickPayload,
   DEVICE_IPC_CHANNELS,
+  LOG_IPC_CHANNELS,
   MEDIA_IPC_CHANNELS,
   NETWORK_IPC_CHANNELS,
   NetworkStatusPayload,
   RegistrationStatusPayload,
+  RendererLogPayload,
   TMediaIpcGetFiles,
 } from '@shared/types/ipc'
 
@@ -98,5 +100,10 @@ export function registerIpcHandlers(): void {
       }
       logger.error('Unexpected POST /click failure', { error: (err as Error).message })
     }
+  })
+
+  //логирование ошибок, пойманных в renderer
+  ipcMain.on(LOG_IPC_CHANNELS.WRITE, (_event, payload: RendererLogPayload) => {
+    logger[payload.level](`[renderer] ${payload.message}`, payload.meta)
   })
 }
