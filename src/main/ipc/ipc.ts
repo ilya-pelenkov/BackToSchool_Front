@@ -17,6 +17,11 @@ import logger from '../logger'
 import { runSync } from '../scheduler'
 import { deviceStore, networkStore, registrationStore } from '../store'
 
+const MAX_FORCE_SYNC_ATTEMPTS = 2
+const FORCE_SYNC_RESET_MS = 1 * 60 * 60 * 1000 // сброс счетчика попыток force sync раз в час
+let forceSyncAttempts = 0 // счетчик попыток force sync - для избежания бесконечного цикла
+let forceSyncResetTimer: NodeJS.Timeout | null = null // таймер для отсчета FORCE_SYNC_RESET
+
 export function registerIpcHandlers(): void {
   //Состояние isRegistered
   ipcMain.handle(DEVICE_IPC_CHANNELS.IS_REGISTERED, (): boolean => {
@@ -46,7 +51,8 @@ export function registerIpcHandlers(): void {
     // TODO: добавить фильтрацию по start_time/end_time когда появится требование
     return cacheManager.getAll().map(item => ({
       contentId: item.contentId,
-      path: `media://${item.localPath}`,
+      // path: `media://${item.localPath}`,
+      path: `media://${item.localPath.replace(/\\/g, '/').replace(':', '%3A')}`,
       type: item.type,
       duration: item.duration,
       qr_code_base64: item.qr_code_base64,
@@ -55,7 +61,24 @@ export function registerIpcHandlers(): void {
 
   //удаление кэша и новый sync запрос при ошибках воспроизведения всех файлов
   ipcMain.handle(MEDIA_IPC_CHANNELS.REQUEST_FORCE_SYNC, async () => {
-    logger.warn('Force sync requested: all files failed to play, clearing cache')
+    if (forceSyncAttempts >= MAX_FORCE_SYNC_ATTEMPTS) {
+      logger.warn('Force sync rejected: max attempts reached', { attempts: forceSyncAttempts })
+      return
+    }
+    forceSyncAttempts += 1
+    logger.warn('Force sync requested: all files failed to play, clearing cache', {
+      attempt: forceSyncAttempts,
+      max_attempts: MAX_FORCE_SYNC_ATTEMPTS,
+    })
+
+    if (!forceSyncResetTimer) {
+      forceSyncResetTimer = setTimeout(() => {
+        forceSyncAttempts = 0
+        forceSyncResetTimer = null
+        logger.info('Force sync attempts counter reset')
+      }, FORCE_SYNC_RESET_MS)
+    }
+
     cacheManager.clearCache()
     await runSync()
   })
