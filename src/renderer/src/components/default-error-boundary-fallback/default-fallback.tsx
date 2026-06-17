@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-
 import { Text } from '@mantine/core'
 
 export type ErrorBoundaryFallbackProps = {
@@ -7,10 +5,10 @@ export type ErrorBoundaryFallbackProps = {
   secondsLeft: number
   totalSeconds: number
   retryNow: () => void
+  retryAttempt: number
 }
 
-//TODO: логика перезагрузки
-export function DefaultFallback({ secondsLeft, totalSeconds, retryNow }: ErrorBoundaryFallbackProps): ReactNode {
+export function DefaultFallback({ secondsLeft, retryAttempt }: ErrorBoundaryFallbackProps) {
   return (
     <div
       style={{
@@ -25,8 +23,13 @@ export function DefaultFallback({ secondsLeft, totalSeconds, retryNow }: ErrorBo
         paddingInline: '200px',
       }}
     >
-      <Text c="dimmed" fw={700} fs={'72px'}>
-        Что-то пошло не так. Перезапуск через {secondsLeft} секунд.
+      <Text c="white" fw={700} size={'80px'} style={{ textAlign: 'center' }}>
+        Что-то пошло не так.
+      </Text>
+      <Text c="dimmed" fw={700} size={'72px'} style={{ textAlign: 'center' }}>
+        {retryAttempt > 1
+          ? `Перезапуск через ${secondsLeft} секунд, попытка ${retryAttempt}.`
+          : `Перезапуск через ${secondsLeft} секунд.`}
       </Text>
     </div>
   )

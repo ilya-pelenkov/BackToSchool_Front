@@ -21,13 +21,14 @@ type ErrorBoundaryProps = {
 type ErrorBoundaryState = {
   error: Error | null
   secondsLeft: number
+  recoveryAttempt: number
 }
 
 const DEFAULT_AUTO_RECOVER_MS = 15_000
 const DEFAULT_MAX_CONSECUTIVE_FAILURES = 3
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { error: null, secondsLeft: 0 }
+  state: ErrorBoundaryState = { error: null, secondsLeft: 0, recoveryAttempt: 0 }
 
   private consecutiveFailures = 0
   private lastRecoveredAt = 0
@@ -53,7 +54,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     onError?.(error, info, source)
 
-    if (this.consecutiveFailures >= maxConsecutiveFailures) {
+    if (this.consecutiveFailures > maxConsecutiveFailures) {
       this.clearTimers()
       onGiveUp?.(error, source)
       return
@@ -96,7 +97,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (!error) return this.props.children
 
     const totalSeconds = Math.ceil((this.props.autoRecoverMs ?? DEFAULT_AUTO_RECOVER_MS) / 1000)
-    const fallbackProps: ErrorBoundaryFallbackProps = { error, secondsLeft, totalSeconds, retryNow: this.retryNow }
+    const fallbackProps: ErrorBoundaryFallbackProps = {
+      error,
+      secondsLeft,
+      totalSeconds,
+      retryNow: this.retryNow,
+      retryAttempt: this.consecutiveFailures,
+    }
 
     return this.props.renderFallback ? this.props.renderFallback(fallbackProps) : <DefaultFallback {...fallbackProps} />
   }
