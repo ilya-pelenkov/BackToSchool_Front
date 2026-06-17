@@ -9,6 +9,7 @@ declare global {
       device: typeof deviceApi
       media: typeof mediaApi
       network: typeof networkApi
+      log: typeof logApi
     }
   }
 }
