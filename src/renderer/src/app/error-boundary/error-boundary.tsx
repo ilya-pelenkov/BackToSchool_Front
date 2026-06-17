@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
-import { DefaultFallback, ErrorBoundaryFallbackProps } from '../../components/error-boundary/default-fallback'
+import { DefaultFallback, ErrorBoundaryFallbackProps } from '@renderer/components/default-error-boundary-fallback'
 
 type ErrorBoundaryProps = {
   children: ReactNode

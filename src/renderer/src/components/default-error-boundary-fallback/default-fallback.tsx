@@ -9,7 +9,8 @@ export type ErrorBoundaryFallbackProps = {
   retryNow: () => void
 }
 
-export function DefaultFallback({ secondsLeft }: ErrorBoundaryFallbackProps): ReactNode {
+//TODO: логика перезагрузки
+export function DefaultFallback({ secondsLeft, totalSeconds, retryNow }: ErrorBoundaryFallbackProps): ReactNode {
   return (
     <div
       style={{
@@ -25,7 +26,7 @@ export function DefaultFallback({ secondsLeft }: ErrorBoundaryFallbackProps): Re
       }}
     >
       <Text c="dimmed" fw={700} fs={'72px'}>
-        Что-то пошло не так. Перезапуск через {secondsLeft} с.
+        Что-то пошло не так. Перезапуск через {secondsLeft} секунд.
       </Text>
     </div>
   )

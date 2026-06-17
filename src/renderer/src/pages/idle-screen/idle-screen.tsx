@@ -1,7 +1,13 @@
+import { useNavigate } from 'react-router'
+
+import { ErrorBoundary } from '@renderer/app/error-boundary'
+import { ROUTES } from '@renderer/app/router/routes'
 import { Header } from '@renderer/components/layout/header'
 import { MediaPlaylist } from '@renderer/components/media-playlist'
+import { reportRendererError } from '@renderer/utils'
 
 function IdleScreen() {
+  const navigate = useNavigate()
   return (
     <div
       style={{
@@ -15,7 +21,14 @@ function IdleScreen() {
         <Header />
       </div>
       <div style={{ position: 'absolute', inset: 0 }}>
-        <MediaPlaylist />
+        <ErrorBoundary
+          source="media-playlist"
+          autoRecoverMs={15000}
+          onError={reportRendererError}
+          onGiveUp={() => navigate(ROUTES.noContent)}
+        >
+          <MediaPlaylist />
+        </ErrorBoundary>
       </div>
     </div>
   )
