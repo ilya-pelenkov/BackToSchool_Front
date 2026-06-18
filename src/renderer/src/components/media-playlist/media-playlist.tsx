@@ -6,14 +6,21 @@ import { Text } from '@mantine/core'
 import { TMediaIpcGetFiles } from '@shared/types'
 
 import { ROUTES } from '@renderer/app/router/routes'
+import { useAutoCloseTimer } from '@renderer/utils'
 
 import { MediaPlayer } from '../media-player'
 import { Modal, QrButton } from '../ui'
+import { QrCloseTimer } from '../ui/qr-close-timer/qr-close-timer'
 
 const QR_BUTTON_TEXT = 'подробнее' // TODO: уточнить текст
 const QR_UNAVAILABLE_TEXT = 'QR-код временно недоступен' // TODO: уточнить текст
 const QR_MODAL_TITLE = 'Забирай скидку по QR-коду!' // TODO: уточнить текст
 const QR_MODAL_TEXT = 'Прямая и мгновенная выгода, понятный призыв к действию.' // TODO: уточнить текст
+
+const QR_MODAL_AUTOCLOSE_MS = 10_000
+const QR_MODAL_WARNING_MS = 5_000
+const QR_MODAL_EXTEND_MS = QR_MODAL_AUTOCLOSE_MS / 2
+const QR_MODAL_MAX_EXTEND_ATEEMPTS = 2
 
 export function MediaPlaylist() {
   const [files, setFiles] = useState<TMediaIpcGetFiles>([])
@@ -80,6 +87,14 @@ export function MediaPlaylist() {
     openModal()
   }
 
+  const { isWarning, progress, extend } = useAutoCloseTimer({
+    isActive: isModalOpen,
+    duration: QR_MODAL_AUTOCLOSE_MS,
+    warningThreshold: QR_MODAL_WARNING_MS,
+    onTimeout: closeModal,
+    maxExtendAttempts: QR_MODAL_MAX_EXTEND_ATEEMPTS,
+  })
+
   if (isLoading) return null // перед проверкой !files.length чтобы избежать лишнего редиректа
   if (!files.length) return <Navigate to={ROUTES.noContent} replace />
   const currentFile = files[currentIndex]
@@ -111,6 +126,7 @@ export function MediaPlaylist() {
               {QR_UNAVAILABLE_TEXT}
             </Text>
           )}
+          <QrCloseTimer progress={progress} isWarning={isWarning} onExtend={() => extend(QR_MODAL_EXTEND_MS)} />
         </Modal>
       )}
       {currentFile.qr_code_base64 && (
