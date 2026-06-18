@@ -29,7 +29,7 @@ export function Modal({ onClose, children, title, text }: ModalProps) {
           transform: 'translate(-50%, -50%)',
           background: '#fff',
           borderRadius: 'var(--mantine-radius-md)',
-          padding: '40px 40px 140px 40px',
+          padding: '40px 40px 40px 40px',
           zIndex: 301,
           display: 'flex',
           flexDirection: 'column',
