@@ -7,16 +7,26 @@ import { pathToFileURL } from 'url'
 import { cacheManager } from './cache'
 import { registerIpcHandlers } from './ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
+import log from './logger'
 import { registerDevice } from './registration'
 import { initScheduler, runHeartbeat, runSync, shouldSendHeartbeatOnStart, shouldSyncOnStart } from './scheduler'
 import { contentStore, deviceStore, registrationStore } from './store'
 import { createWindow } from './window'
+
+process.on('uncaughtException', error => {
+  log.error('Uncaught exception:', error)
+})
+
+process.on('unhandledRejection', reason => {
+  log.error('Unhandled rejection:', reason)
+})
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'media', privileges: { secure: true, standard: false, stream: true, bypassCSP: true } },
 ])
 
 app.whenReady().then(async () => {
+  log.info('App ready, initializing kiosk window')
   electronApp.setAppUserModelId('com.back-to-school.kiosk')
 
   app.on('browser-window-created', (_, window) => {
@@ -28,7 +38,11 @@ app.whenReady().then(async () => {
   const win = createWindow()
   registerSecurityHandlers(win)
 
-  cacheManager.init()
+  try {
+    cacheManager.init()
+  } catch (error) {
+    log.error('cacheManager.init failed:', error)
+  }
 
   if (is.dev) registrationStore.clear() //- для тестирования регистрации, TODO: удалить
   if (is.dev) contentStore.clear() //- для тестирования загрузки контента, TODO: удалить

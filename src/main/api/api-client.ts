@@ -1,3 +1,5 @@
+import { is } from '@electron-toolkit/utils'
+
 import { ApiError } from '@shared/request-errors'
 
 import logger from '../logger'
@@ -5,7 +7,7 @@ import { registrationStore } from '../store'
 import { runErrorHandlers } from './error-handlers'
 import { RetryPreset, calcDelay, getRetryOptions, sleep } from './retry'
 
-const BASE_URL = import.meta.env.MAIN_VITE_API_URL
+const BASE_URL = is.dev ? import.meta.env.MAIN_VITE_API_URL_DEV : import.meta.env.MAIN_VITE_API_URL
 
 interface RequestOptions extends RequestInit {
   timeout?: number
