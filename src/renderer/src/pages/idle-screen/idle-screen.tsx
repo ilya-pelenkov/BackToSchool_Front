@@ -4,7 +4,7 @@ import { ErrorBoundary } from '@renderer/app/error-boundary'
 import { ROUTES } from '@renderer/app/router/routes'
 import { Header } from '@renderer/components/layout/header'
 import { MediaPlaylist } from '@renderer/components/media-playlist'
-import { reportRendererError } from '@renderer/utils'
+import { reportReactBoundaryError } from '@renderer/utils'
 
 function IdleScreen() {
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ function IdleScreen() {
         <ErrorBoundary
           source="media-playlist"
           autoRecoverMs={15000}
-          onError={reportRendererError}
+          onError={reportReactBoundaryError}
           onGiveUp={() => navigate(ROUTES.noContent)}
         >
           <MediaPlaylist />

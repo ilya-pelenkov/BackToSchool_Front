@@ -1,6 +1,6 @@
 import type { ErrorInfo } from 'react'
 
-export function reportRendererError(error: Error, info: ErrorInfo, source: string): void {
+export function reportReactBoundaryError(error: Error, info: ErrorInfo, source: string): void {
   window.api.log.error(error.message, {
     stack: error.stack,
     componentStack: info.componentStack ?? undefined,
