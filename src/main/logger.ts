@@ -4,5 +4,6 @@ log.initialize()
 
 log.transports.file.level = 'info'
 log.transports.console.level = 'debug'
+log.info('logger ready')
 
 export default log
