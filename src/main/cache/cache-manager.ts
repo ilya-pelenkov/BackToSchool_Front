@@ -8,7 +8,7 @@ import type { CachedContent, Content } from '@shared/types'
 import { downloadFile } from '../api/'
 import logger from '../logger'
 import { contentStore } from '../store/content-store'
-import { getFreeSpace } from './get-free-space'
+import { getFreeSpace, isValidBase64Image } from './cache-manager-utils'
 
 export const CACHE_DIR = path.join(app.getPath('userData'), 'cache')
 
@@ -25,11 +25,11 @@ const TIMEOUT_BY_TYPE = {
 //TODO: скорректировать после получения реальных размеров файлов
 const MIN_FREE_SPACE_BY_TYPE = {
   banner: 25 * 1024 * 1024 * 2, //макс размер одного баннера × 2
-  video: 500 * 1024 * 1024 * 2, //макс размер одного видео × 2
+  video: 300 * 1024 * 1024 * 2, //макс размер одного видео × 2
 } satisfies Record<Content['type'], number>
 
 //запас для работы самого приложения — логи, electron-store, обновления
-const MIN_SYSTEM_RESERVE_BYTES = 400 * 1024 * 1024 // 400 МБ
+const MIN_SYSTEM_RESERVE_BYTES = 500 * 1024 * 1024 // 500 МБ
 
 export const cacheManager = {
   //инициализация при первом запуске приложения - создание папок для кэширования
@@ -94,6 +94,12 @@ export const cacheManager = {
         timeout: TIMEOUT_BY_TYPE[item.type],
       })
 
+      const qrCode = isValidBase64Image(item.qr_code_base64) ? item.qr_code_base64 : undefined
+
+      if (!qrCode && item.qr_code_base64) {
+        logger.warn('Invalid qr_code_base64 format, discarding', { id: item.id })
+      }
+
       const cached: CachedContent = {
         contentId: item.id,
         type: item.type,
@@ -103,7 +109,7 @@ export const cacheManager = {
         downloadedAt: new Date().toISOString(),
         duration: item.duration,
         schedule: item.schedule,
-        qr_code_base64: item.qr_code_base64 || undefined,
+        qr_code_base64: qrCode,
       }
 
       const items = contentStore.get('items')
@@ -134,6 +140,13 @@ export const cacheManager = {
   //возвращает массив данных о кэшированных файлах (используется в передаче через ipc для renderer)
   getAll(): CachedContent[] {
     return Object.values(contentStore.get('items')).filter(item => fs.existsSync(item.localPath))
+  },
+
+  //возвращает один закэшированный файл по contentId
+  getById(contentId: number): CachedContent | undefined {
+    const item = contentStore.get('items')[contentId]
+    if (!item || !fs.existsSync(item.localPath)) return undefined
+    return item
   },
 
   //удаление закэшированных файлов и очистка contentStore

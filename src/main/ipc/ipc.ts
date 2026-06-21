@@ -51,18 +51,13 @@ export function registerIpcHandlers(): void {
   //Получение медиа файлов для отображения
   ipcMain.handle(MEDIA_IPC_CHANNELS.GET_FILES, (): TMediaIpcGetFiles => {
     // TODO: добавить фильтрацию по start_time/end_time когда появится требование
-    return cacheManager.getAll().map(item => {
-      const normalizedPath = item.localPath.replace(/\\/g, '/')
-      const encodedPath = normalizedPath.split('/').map(encodeURIComponent).join('/')
-
-      return {
-        contentId: item.contentId,
-        path: `media://${encodedPath}`,
-        type: item.type,
-        duration: item.duration,
-        qr_code_base64: item.qr_code_base64,
-      }
-    })
+    return cacheManager.getAll().map(item => ({
+      contentId: item.contentId,
+      path: `media://${item.contentId}`,
+      type: item.type,
+      duration: item.duration,
+      qr_code_base64: item.qr_code_base64,
+    }))
   })
 
   //удаление кэша и новый sync запрос при ошибках воспроизведения всех файлов

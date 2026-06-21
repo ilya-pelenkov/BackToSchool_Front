@@ -79,7 +79,19 @@ app.whenReady().then(async () => {
   })
 
   protocol.handle('media', request => {
-    const filePath = decodeURIComponent(request.url.slice('media://'.length))
-    return net.fetch(pathToFileURL(filePath).toString())
+    const contentId = Number(request.url.slice('media://'.length))
+
+    if (Number.isNaN(contentId)) {
+      log.error('Invalid media request: bad contentId', { url: request.url })
+      return new Response('Bad Request', { status: 400 })
+    }
+
+    const item = cacheManager.getById(contentId)
+    if (!item) {
+      log.error('Media request: content not found', { contentId })
+      return new Response('Not Found', { status: 404 })
+    }
+
+    return net.fetch(pathToFileURL(item.localPath).toString())
   })
 })
