@@ -69,8 +69,6 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
   }, [file.path, file.duration, file.type, isPaused, handleFade])
 
   const onErrorWithLog = e => {
-    console.log('==========================')
-    console.log(e.target.error)
     logError(e.target.error)
     onError()
   }

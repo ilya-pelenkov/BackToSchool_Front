@@ -1,3 +1,4 @@
+import { is } from '@electron-toolkit/utils'
 import { machineIdSync } from 'node-machine-id'
 
 import { isApiError } from '../shared/request-errors'
@@ -11,7 +12,7 @@ export async function registerDevice(): Promise<void> {
   try {
     registrationStore.set('isRegisterLoading', true)
     registrationStore.set('isRegistrationError', false)
-    const deviceKey = machineIdSync()
+    const deviceKey = is.dev ? 'test' : machineIdSync()
     const { auth_token, terminal_id } = await deviceApi.register(deviceKey, (attempt, maxAttempts) => {
       sendToRenderer('registration:attempt', {
         attempt,
