@@ -13,7 +13,11 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
-    console.error(error)
+    if (error instanceof Error) {
+      api.log.error(error.message)
+    } else {
+      api.log.error(`preload contextBridge error`)
+    }
   }
 } else {
   // @ts-ignore (define in dts)

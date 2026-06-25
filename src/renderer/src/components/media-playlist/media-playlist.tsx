@@ -6,7 +6,7 @@ import { Text } from '@mantine/core'
 import { TMediaIpcGetFiles } from '@shared/types'
 
 import { ROUTES } from '@renderer/app/router/routes'
-import { useAutoCloseTimer } from '@renderer/utils'
+import { logError, useAutoCloseTimer } from '@renderer/utils'
 
 import { MediaPlayer } from '../media-player'
 import { Modal, QrButton } from '../ui'
@@ -37,7 +37,7 @@ export function MediaPlaylist() {
       .then(setFiles)
       .catch(err => {
         //ошибка маловероятна, но если что показывается экран отсутствия контента
-        console.error('Failed to load media files', err)
+        logError('Failed to load media files', err)
         setFiles([])
       })
       .finally(() => {
@@ -61,10 +61,10 @@ export function MediaPlaylist() {
   }
 
   const handleError = (): void => {
-    console.error('Failed to play media file', currentFile)
+    logError('Failed to play media file', `id - ${currentFile.contentId}, type - ${currentFile.type}`)
     errorCountRef.current += 1
     if (errorCountRef.current >= files.length) {
-      console.error('No playable files available')
+      logError('No playable files available')
       window.api.media.requestForceSync() // запрашиваем перезагрузку файлов в main
       navigate(ROUTES.noContent) // потом навигация
       return
