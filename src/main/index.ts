@@ -22,7 +22,7 @@ process.on('unhandledRejection', reason => {
 })
 
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'media', privileges: { secure: true, standard: false, stream: true, bypassCSP: true } },
+  { scheme: 'media', privileges: { secure: true, standard: true, stream: true, bypassCSP: true } },
 ])
 
 app.whenReady().then(async () => {
@@ -78,8 +78,25 @@ app.whenReady().then(async () => {
     globalShortcut.unregisterAll()
   })
 
+  // protocol.handle('media', request => {
+  //   const contentId = Number(request.url.slice('media://'.length))
+
+  //   if (Number.isNaN(contentId)) {
+  //     log.error('Invalid media request: bad contentId', { url: request.url })
+  //     return new Response('Bad Request', { status: 400 })
+  //   }
+
+  //   const item = cacheManager.getById(contentId)
+  //   if (!item) {
+  //     log.error('Media request: content not found', { contentId })
+  //     return new Response('Not Found', { status: 404 })
+  //   }
+
+  //   return net.fetch(pathToFileURL(item.localPath).toString())
+  // })
   protocol.handle('media', request => {
-    const contentId = Number(request.url.slice('media://'.length))
+    const url = new URL(request.url)
+    const contentId = Number(url.pathname.slice(1))
 
     if (Number.isNaN(contentId)) {
       log.error('Invalid media request: bad contentId', { url: request.url })
