@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { TMediaFile } from '@shared/types/ipc'
 
+import { logError } from '@renderer/utils'
+
 interface MediaPlayerProps {
   file: TMediaFile
   nextFile: TMediaFile
@@ -66,6 +68,11 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
     }
   }, [file.path, file.duration, file.type, isPaused, handleFade])
 
+  const onErrorWithLog = e => {
+    logError(e.target.error)
+    onError()
+  }
+
   /* для видео **/
   useEffect(() => {
     if (!videoRef.current) return
@@ -84,7 +91,7 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
         ref={videoRef}
         autoPlay
         onEnded={onEnded}
-        onError={onError}
+        onError={onErrorWithLog}
         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
       />
     )
@@ -104,7 +111,7 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
       <img
         key={slots.current}
         src={slots.current}
-        onError={onError}
+        onError={onErrorWithLog}
         style={{
           position: 'absolute',
           inset: 0,
@@ -119,7 +126,7 @@ export function MediaPlayer({ file, nextFile, onEnded, onError, isPaused }: Medi
         <img
           key={slots.next}
           src={slots.next}
-          onError={onError}
+          onError={onErrorWithLog}
           style={{
             position: 'absolute',
             inset: 0,

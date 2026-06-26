@@ -1,10 +1,10 @@
-import { BrowserWindow, app, globalShortcut } from 'electron'
+import { BrowserWindow, globalShortcut } from 'electron'
 
 import { is } from '@electron-toolkit/utils'
 
 import log from './logger'
 
-const CUSTOM_CLOSE_APP_HOTKEY = 'Escape' // TODO: продумать клавишу для закрытия приложения
+const CUSTOM_CLOSE_APP_HOTKEY = import.meta.env.MAIN_VITE_CUSTOM_CLOSE_APP_HOTKEY
 
 export function registerSecurityHandlers(win: BrowserWindow): void {
   // кастомный hotkey для закрытия приложения - срабатывает при повторном нажатии в течение 3000мс (3 сек)
@@ -14,7 +14,7 @@ export function registerSecurityHandlers(win: BrowserWindow): void {
       const now = Date.now()
 
       if (now - firstPress < 3000) {
-        app.exit(0)
+        win.destroy() // или app.exit(0), не заменять на app.quit()
       } else {
         firstPress = now
       }

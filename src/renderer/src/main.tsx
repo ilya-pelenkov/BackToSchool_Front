@@ -7,7 +7,7 @@ import { DeviceProvider, NetworkProvider, SyncProvider, ThemeProvider } from './
 import { router } from './app/router/router'
 import './styles/fonts.css'
 import './styles/main.css'
-import { reportRendererError } from './utils'
+import { reportReactBoundaryError } from './utils'
 
 import '@mantine/core/styles.css'
 
@@ -51,7 +51,7 @@ createRoot(document.getElementById('root')!).render(
             <ErrorBoundary
               source="root"
               autoRecoverMs={30_000}
-              onError={reportRendererError}
+              onError={reportReactBoundaryError}
               onGiveUp={() => window.location.reload()} // пересоздается все окно, так как ErrorBoundary выше роутера
             >
               <RouterProvider router={router} />

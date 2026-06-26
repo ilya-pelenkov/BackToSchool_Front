@@ -10,7 +10,7 @@ import { sendToRenderer } from '../window'
 
 const SYNC_RETRY_DELAY_MS = 5 * 60 * 1000
 const MAX_SYNC_RETRIES = 3
-const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 часа
+const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 часа TODO: исправить время, когда появится точно расписание
 const EMPTY_CONTENT_RETRY_MS = 2 * 60 * 60 * 1000 // 2 часа
 
 // однократный запрос
