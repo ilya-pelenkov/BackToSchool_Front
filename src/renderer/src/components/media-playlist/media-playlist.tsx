@@ -22,23 +22,29 @@ const QR_MODAL_WARNING_MS = 5_000
 const QR_MODAL_EXTEND_MS = QR_MODAL_AUTOCLOSE_MS / 2
 const QR_MODAL_MAX_EXTEND_ATEEMPTS = 2
 
+// const MAX_CONSECUTIVE_FILE_ERRORS = 30
+
 export function MediaPlaylist() {
   const [files, setFiles] = useState<TMediaIpcGetFiles>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const errorCountRef = useRef(0)
+  const failedFileIdsRef = useRef<Set<number>>(new Set())
+  const consecutiveErrorsRef = useRef<Map<number, number>>(new Map())
   const navigate = useNavigate()
 
   const loadFiles = (): void => {
     window.api.media
       .getFiles()
-      .then(setFiles)
+      .then(files => {
+        setFiles(files)
+        failedFileIdsRef.current = new Set()
+        consecutiveErrorsRef.current = new Map()
+      })
       .catch(err => {
-        //ошибка маловероятна, но если что показывается экран отсутствия контента
         logError('Failed to load media files', err)
-        setFiles([])
+        setFiles([]) // -> перенаправление на экран пустого контента
       })
       .finally(() => {
         setIsLoading(false)
@@ -51,9 +57,10 @@ export function MediaPlaylist() {
     return unsubscribe
   }, [])
 
-  const goNext = (): void => {
+  const goNext = (contentId: number): void => {
+    console.log('next file')
+    consecutiveErrorsRef.current.set(contentId, 0) // сбрасываем счётчик ошибок файла, который успешно воспроизвёлся
     setCurrentIndex(i => (i + 1) % files.length)
-    errorCountRef.current = 0
   }
 
   const goNextOnError = (): void => {
@@ -61,14 +68,30 @@ export function MediaPlaylist() {
   }
 
   const handleError = (): void => {
-    logError('Failed to play media file', `id - ${currentFile.contentId}, type - ${currentFile.type}`)
-    errorCountRef.current += 1
-    if (errorCountRef.current >= files.length) {
+    const { contentId, type } = currentFile
+    logError('Failed to play media file', `id - ${contentId}, type - ${type}`)
+
+    const prevConsecutive = consecutiveErrorsRef.current.get(contentId) ?? 0
+    const nextConsecutive = prevConsecutive + 1
+    consecutiveErrorsRef.current.set(contentId, nextConsecutive)
+
+    failedFileIdsRef.current.add(contentId)
+
+    if (failedFileIdsRef.current.size >= files.length) {
       logError('No playable files available')
-      window.api.media.requestForceSync() // запрашиваем перезагрузку файлов в main
-      navigate(ROUTES.noContent) // потом навигация
+      window.api.media.requestForceSync()
+      navigate(ROUTES.noContent)
       return
     }
+
+    //TODO: добавить IPC-канал requestFileSync с логикой
+    // if (nextConsecutive >= MAX_CONSECUTIVE_FILE_ERRORS) {
+    //   logError('File repeatedly failing, requesting individual sync', `id - ${contentId}`)
+    //   window.api.media.requestFileSync(contentId)
+    //   consecutiveErrorsRef.current.set(contentId, 0)
+    //   failedFileIdsRef.current.delete(contentId)
+    // }
+
     goNextOnError()
   }
 
@@ -113,7 +136,13 @@ export function MediaPlaylist() {
           zIndex: 50,
         }}
       ></div>
-      <MediaPlayer file={currentFile} nextFile={nextFile} onEnded={goNext} onError={handleError} isPaused={isPaused} />
+      <MediaPlayer
+        file={currentFile}
+        nextFile={nextFile}
+        onEnded={() => goNext(currentFile.contentId)}
+        onError={handleError}
+        isPaused={isPaused}
+      />
       {currentFile.qr_code_base64 && (
         <QrButton onClick={() => onQrButtonClick(currentFile.contentId)} content={QR_BUTTON_TEXT} />
       )}
