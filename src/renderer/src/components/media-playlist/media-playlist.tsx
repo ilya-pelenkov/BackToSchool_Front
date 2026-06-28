@@ -12,10 +12,9 @@ import { MediaPlayer } from '../media-player'
 import { Modal, QrButton } from '../ui'
 import { QrCloseTimer } from '../ui/qr-close-timer/qr-close-timer'
 
-const QR_BUTTON_TEXT = 'подробнее' // TODO: уточнить текст
-const QR_UNAVAILABLE_TEXT = 'QR-код временно недоступен' // TODO: уточнить текст
-const QR_MODAL_TITLE = 'Забирай скидку по QR-коду!' // TODO: уточнить текст
-const QR_MODAL_TEXT = 'Прямая и мгновенная выгода, понятный призыв к действию.' // TODO: уточнить текст
+const QR_BUTTON_TEXT = 'подробнее'
+const QR_UNAVAILABLE_TEXT = 'QR-код временно недоступен'
+const QR_MODAL_TITLE = 'Наведи камеру - контакт уже в телефоне!'
 
 const QR_MODAL_AUTOCLOSE_MS = 10_000
 const QR_MODAL_WARNING_MS = 5_000
@@ -147,7 +146,7 @@ export function MediaPlaylist() {
         <QrButton onClick={() => onQrButtonClick(currentFile.contentId)} content={QR_BUTTON_TEXT} />
       )}
       {isModalOpen && (
-        <Modal onClose={closeModal} title={QR_MODAL_TITLE} text={QR_MODAL_TEXT}>
+        <Modal onClose={closeModal} title={QR_MODAL_TITLE}>
           {currentFile.qr_code_base64 ? (
             <img src={`${currentFile.qr_code_base64}`} alt="QR код" style={{ width: 400, height: 400 }} />
           ) : (
