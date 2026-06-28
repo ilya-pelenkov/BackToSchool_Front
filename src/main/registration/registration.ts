@@ -1,18 +1,18 @@
-import { is } from '@electron-toolkit/utils'
-import { machineIdSync } from 'node-machine-id'
-
-import { isApiError } from '../shared/request-errors'
-import { deviceApi } from './api'
-import { resetReregistrationAttempts } from './api/setup-error-handlers'
-import logger from './logger'
-import { deviceStore, registrationStore } from './store'
-import { sendToRenderer } from './window'
+import { isApiError } from '../../shared/request-errors'
+import { deviceApi } from '../api'
+import { resetReregistrationAttempts } from '../api/setup-error-handlers'
+import logger from '../logger'
+import log from '../logger'
+import { deviceStore, registrationStore } from '../store'
+import { sendToRenderer } from '../window'
+import { getDeviceKey } from './get-device-key'
 
 export async function registerDevice(): Promise<void> {
   try {
     registrationStore.set('isRegisterLoading', true)
     registrationStore.set('isRegistrationError', false)
-    const deviceKey = is.dev ? 'test' : machineIdSync()
+    const deviceKey = getDeviceKey()
+    log.info('ключ устройства', deviceKey)
     const { auth_token, terminal_id } = await deviceApi.register(deviceKey, (attempt, maxAttempts) => {
       sendToRenderer('registration:attempt', {
         attempt,
