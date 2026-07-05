@@ -6,7 +6,7 @@ type ModalProps = {
   onClose: () => void
   children?: React.ReactNode
   title: string
-  text: string
+  text?: string
 }
 
 export function Modal({ onClose, children, title, text }: ModalProps) {
@@ -46,10 +46,10 @@ export function Modal({ onClose, children, title, text }: ModalProps) {
             paddingInline: '60px',
           }}
         >
-          <Title order={2} miw={'986px'} mb={'32px'}>
+          <Title order={2} miw={'986px'} mb={text ? '32px' : 0} style={{ textAlign: 'center' }}>
             {title}
           </Title>
-          <Text style={{ textAlign: 'center' }}>{text}</Text>
+          {text && <Text style={{ textAlign: 'center' }}>{text}</Text>}
         </div>
         {children}
       </div>

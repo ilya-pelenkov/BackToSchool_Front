@@ -2,6 +2,10 @@ import { RendererLogLevel } from '@shared/types/ipc'
 
 type ErrorContext = Record<string, unknown>
 
+function isMediaError(value: unknown): value is MediaError {
+  return value instanceof MediaError
+}
+
 function serializeError(error: unknown): { message: string; stack?: string; name?: string } {
   if (error instanceof Error) {
     return {
@@ -40,7 +44,17 @@ function logRendererEvent(
           stack: serialized.stack,
         }
       : {}),
-    ...(payload !== undefined && !isErrorLike ? { rawPayload: payload } : {}),
+    ...(payload !== undefined && !isErrorLike
+      ? isMediaError(payload)
+        ? {
+            message: payload.message,
+            name: 'MediaError',
+            details: {
+              code: payload.code,
+            },
+          }
+        : { rawPayload: payload }
+      : {}),
   })
 }
 

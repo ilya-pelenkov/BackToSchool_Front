@@ -1,14 +1,14 @@
-import { app, globalShortcut, net, protocol } from 'electron'
+import { app, globalShortcut, protocol } from 'electron'
 
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { is } from '@electron-toolkit/utils'
-import { pathToFileURL } from 'url'
+import fs from 'fs'
 
 import { cacheManager } from './cache'
 import { registerIpcHandlers } from './ipc'
 import { registerSecurityHandlers } from './kiosk-mode-security'
 import log from './logger'
-import { registerDevice } from './registration'
+import { registerDevice } from './registration/registration'
 import { initScheduler, runHeartbeat, runSync, shouldSendHeartbeatOnStart, shouldSyncOnStart } from './scheduler'
 import { contentStore, deviceStore, registrationStore } from './store'
 import { createWindow } from './window'
@@ -22,7 +22,7 @@ process.on('unhandledRejection', reason => {
 })
 
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'media', privileges: { secure: true, standard: false, stream: true, bypassCSP: true } },
+  { scheme: 'media', privileges: { secure: true, standard: true, stream: true, bypassCSP: true } },
 ])
 
 app.whenReady().then(async () => {
@@ -79,7 +79,8 @@ app.whenReady().then(async () => {
   })
 
   protocol.handle('media', request => {
-    const contentId = Number(request.url.slice('media://'.length))
+    const url = new URL(request.url)
+    const contentId = Number(url.pathname.slice(1))
 
     if (Number.isNaN(contentId)) {
       log.error('Invalid media request: bad contentId', { url: request.url })
@@ -92,6 +93,56 @@ app.whenReady().then(async () => {
       return new Response('Not Found', { status: 404 })
     }
 
-    return net.fetch(pathToFileURL(item.localPath).toString())
+    // return net.fetch(pathToFileURL(item.localPath).toString())
+
+    const filePath = item.localPath
+    if (!fs.existsSync(filePath)) {
+      log.error('Media request: file not found on disk', { contentId, filePath })
+      return new Response('Not Found', { status: 404 })
+    }
+
+    const stat = fs.statSync(filePath)
+    const fileSize = stat.size
+    const range = request.headers.get('range')
+    const contentType = filePath.endsWith('.mp4') ? 'video/mp4' : filePath.endsWith('.png') ? 'image/png' : 'image/jpeg'
+
+    const createStream = (start: number, end: number) => {
+      const stream = fs.createReadStream(filePath, { start, end })
+      return new ReadableStream({
+        start(controller) {
+          stream.on('data', chunk => controller.enqueue(new Uint8Array(chunk as Buffer)))
+          stream.on('end', () => controller.close())
+          stream.on('error', err => controller.error(err))
+        },
+        cancel() {
+          stream.destroy()
+        },
+      })
+    }
+
+    if (range) {
+      const match = /bytes=(\d+)-(\d*)/.exec(range)
+      const start = match ? parseInt(match[1], 10) : 0
+      const end = match && match[2] ? parseInt(match[2], 10) : fileSize - 1
+
+      return new Response(createStream(start, end), {
+        status: 206,
+        headers: {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': String(end - start + 1),
+          'Content-Type': contentType,
+        },
+      })
+    }
+
+    return new Response(createStream(0, fileSize - 1), {
+      status: 200,
+      headers: {
+        'Content-Length': String(fileSize),
+        'Content-Type': contentType,
+        'Accept-Ranges': 'bytes',
+      },
+    })
   })
 })

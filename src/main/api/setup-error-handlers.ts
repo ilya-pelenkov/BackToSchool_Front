@@ -3,7 +3,7 @@ import { net } from 'electron'
 import { NETWORK_IPC_CHANNELS } from '@shared/types/ipc'
 
 import logger from '../logger'
-import { registerDevice } from '../registration'
+import { registerDevice } from '../registration/registration'
 import { deviceStore, networkStore, registrationStore } from '../store'
 import { sendToRenderer } from '../window'
 import { registerErrorHandler } from './error-handlers'
